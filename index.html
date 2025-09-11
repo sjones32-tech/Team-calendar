@@ -4,24 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Team Calendar</title>
-    <meta name="description" content="Professional team resource calendar with today's jobs and OneDrive integration">
+    <meta name="description" content="Professional team resource calendar with Excel integration">
     <meta name="theme-color" content="#3b82f6">
     
     <!-- PWA Configuration -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Team Calendar">
-    <meta name="mobile-web-app-capable" content="yes">
     
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiVGVhbSBDYWxlbmRhciIsInNob3J0X25hbWUiOiJUZWFtQ2FsIiwiZGVzY3JpcHRpb24iOiJQcm9mZXNzaW9uYWwgdGVhbSByZXNvdXJjZSBjYWxlbmRhciIsInN0YXJ0X3VybCI6Ii8iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjZmZmZmZmIiwidGhlbWVfY29sb3IiOiIjM2I4MmY2Iiwib3JpZW50YXRpb24iOiJwb3J0cmFpdCIsImljb25zIjpbeyJzcmMiOiJkYXRhOmltYWdlL3N2Zyt4bWw7YmFzZTY0LFBITjJaeUI0Yld4dWN6MGlhSFIwY0RvdkwzZDNkeTUzTXk1dmNtY3ZNakF3TUM5emRtY2lJSFpwWlhkQ2IzZzlTU0l3SURBZ01qVTJJREkxTmlKZ1ptbHNiRDBpSXpNeU9EZG1OaUkrUEhKbFkzUWdlRDBpTkRnaUlIazlJalE0SWlCM2FXUjBhRDBpTVRZd0lpQm9aV2xuYUhROUlqRTJNQ0lnWm1sc2JEMGlJelEzT0RBME1DSXZQand2YzNabmZqND0iLCJzaXplcyI6IjI1NngyNTYiLCJ0eXBlIjoiaW1hZ2Uvc3ZnK3htbCIsInB1cnBvc2UiOiJtYXNrYWJsZSJ9LHsic3JjIjoiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCNGJXeHVjejBpYUhSMGNEb3ZMM2QzZHk1M015NXZjbWN2TWpBd01DOXpkbWNpSUhacFpYZENiM2c5U1NJd0lEQWdOVEV5SURRNE1pSWdabWxzYkQwaVdURXhZemhpT0NJK1BISmxZM1FnZUQwaU1USWlJSGs5SWpFeUlpQjNhV1IwYUQwaVF6QTRJaUJvWldsbmFIUTlTU0pETURnaUlHWnBiR3c5U1NKUFJtWm1abVlpTHo0OEwzTjJaejQ9Iiwic2l6ZXMiOiI1MTJ4NDgyIiwidHlwZSI6ImltYWdlL3N2Zyt4bWwiLCJwdXJwb3NlIjoiYW55In1dfQ==">
-    
-    <!-- App Icons -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTYgMjU2IiBmaWxsPSIjMzI4N2Y2Ij48cmVjdCB4PSI0OCIgeT0iNDgiIHdpZHRoPSIxNjAiIGhlaWdodD0iMTYwIiBmaWxsPSIjNDcwNDAiLz48L3N2Zz4=">
-    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNDgyIiBmaWxsPSJZMjhiOCIrPHJlY3QgeD0iMTIiIHk9IjEyIiB3aWR0aD0iQzA4IiBoZWlnaHQ9IkMwOCIgZmlsbD0iT0ZmZmZmIi8+PC9zdmc+">
+    <!-- External Libraries for Excel Parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
-        /* CSS Variables for Easy Customization */
+        /* CSS Variables */
         :root {
             --primary-blue: #3b82f6;
             --primary-hover: #2563eb;
@@ -31,12 +26,8 @@
             --gray-50: #f9fafb;
             --gray-100: #f3f4f6;
             --gray-200: #e5e7eb;
-            --gray-300: #d1d5db;
-            --gray-400: #9ca3af;
             --gray-500: #6b7280;
-            --gray-600: #4b5563;
             --gray-700: #374151;
-            --gray-800: #1f2937;
             --gray-900: #111827;
             --white: #ffffff;
             --border-radius: 8px;
@@ -44,7 +35,6 @@
             --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
-        /* Reset and Base Styles */
         * {
             margin: 0;
             padding: 0;
@@ -52,12 +42,11 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
             background-color: var(--gray-50);
             color: var(--gray-900);
             line-height: 1.5;
             -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
         }
 
         .app-container {
@@ -66,10 +55,9 @@
             min-height: 100vh;
             background: var(--white);
             box-shadow: var(--shadow-lg);
-            position: relative;
         }
 
-        /* Header Styles */
+        /* Header */
         .app-header {
             background: var(--white);
             padding: 16px;
@@ -84,7 +72,6 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 8px;
         }
 
         .icon-button {
@@ -97,122 +84,168 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            min-width: 40px;
-            min-height: 40px;
         }
 
         .icon-button:hover {
             background-color: var(--gray-100);
         }
 
-        .icon-button:active {
-            background-color: var(--gray-200);
-            transform: scale(0.95);
-        }
-
-        .month-navigation {
+        .month-nav {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 16px;
         }
 
         .month-title {
             font-size: 18px;
             font-weight: 600;
-            color: var(--gray-900);
             min-width: 160px;
             text-align: center;
         }
 
-        .member-info-bar {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 0;
-            border-top: 1px solid var(--gray-200);
-        }
-
-        .avatar {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
+        /* Status Indicator */
+        .status-bar {
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--white);
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .member-details h3 {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--gray-900);
-            margin: 0;
-        }
-
-        .member-details p {
+            gap: 8px;
+            padding: 8px;
+            border-top: 1px solid var(--gray-200);
             font-size: 12px;
-            color: var(--gray-500);
-            margin: 0;
         }
 
-        /* Main Content */
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .status-loading { background: var(--warning-orange); }
+        .status-connected { background: var(--success-green); }
+        .status-error { background: var(--error-red); }
+        .status-local { background: var(--gray-500); }
+
+        /* Content */
         .main-content {
             padding: 16px;
-            min-height: calc(100vh - 200px);
+            min-height: calc(100vh - 180px);
         }
 
-        .page-title {
+        .loading-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
             text-align: center;
-            font-size: 14px;
-            color: var(--gray-600);
+        }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--gray-200);
+            border-top: 3px solid var(--primary-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
             margin-bottom: 16px;
         }
 
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* File Upload Area */
+        .file-upload-area {
+            border: 2px dashed var(--gray-300);
+            border-radius: 12px;
+            padding: 32px;
+            text-align: center;
+            margin-bottom: 24px;
+            background: var(--gray-50);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload-area:hover {
+            border-color: var(--primary-blue);
+            background: #eff6ff;
+        }
+
+        .file-upload-area.dragover {
+            border-color: var(--primary-blue);
+            background: #dbeafe;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            color: var(--gray-400);
+        }
+
+        .upload-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: 8px;
+        }
+
+        .upload-subtext {
+            font-size: 14px;
+            color: var(--gray-500);
+        }
+
+        .file-input {
+            display: none;
+        }
+
         /* Today's Jobs Card */
-        .todays-jobs-card {
+        .todays-jobs {
             background: var(--white);
             border: 1px solid var(--gray-200);
             border-radius: 12px;
             margin-bottom: 16px;
             box-shadow: var(--shadow);
-            overflow: hidden;
         }
 
         .card-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 16px 16px 12px;
+            padding: 16px;
             border-bottom: 1px solid var(--gray-100);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: var(--white);
+            border-radius: 12px 12px 0 0;
         }
 
         .card-title {
             font-size: 16px;
             font-weight: 600;
-            color: var(--gray-800);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .job-count-badge {
-            background: var(--primary-blue);
+            background: rgba(255, 255, 255, 0.2);
             color: var(--white);
             padding: 4px 8px;
             border-radius: 12px;
             font-size: 12px;
             font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
-        .jobs-list {
-            max-height: 240px;
+        .jobs-container {
+            padding: 12px 16px 16px;
+            max-height: 300px;
             overflow-y: auto;
-            padding: 8px 16px 16px;
         }
 
         .job-item {
             display: flex;
-            align-items: flex-start;
+            align-items: center;
             gap: 12px;
             padding: 12px;
             border: 1px solid var(--gray-200);
@@ -225,19 +258,24 @@
 
         .job-item:hover {
             background: var(--gray-50);
-            border-color: var(--gray-300);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
         }
 
-        .job-item:active {
-            transform: scale(0.98);
+        .job-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 12px;
+            font-weight: 700;
+            flex-shrink: 0;
         }
 
-        .job-item.on-call {
-            border-color: #fca5a5;
-            background: #fef2f2;
-        }
-
-        .job-content {
+        .job-details {
             flex: 1;
             min-width: 0;
         }
@@ -245,30 +283,22 @@
         .job-header {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             margin-bottom: 4px;
             flex-wrap: wrap;
         }
 
         .job-type-badge {
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
             font-weight: 600;
             border: 1px solid;
         }
 
-        .priority-badge {
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .priority-high { background: #fef2f2; color: #dc2626; }
-        .priority-medium { background: #fef3c7; color: #d97706; }
-        .priority-low { background: #ecfdf5; color: #059669; }
+        .priority-high { background: #fef2f2; color: #dc2626; border-color: #fca5a5; }
+        .priority-medium { background: #fef3c7; color: #d97706; border-color: #fde047; }
+        .priority-low { background: #ecfdf5; color: #059669; border-color: #86efac; }
 
         .job-title {
             font-size: 14px;
@@ -280,78 +310,30 @@
             white-space: nowrap;
         }
 
-        .job-member {
-            font-size: 12px;
-            color: var(--gray-600);
-            margin-bottom: 2px;
-        }
-
-        .job-client {
-            font-size: 12px;
-            color: var(--gray-500);
-            margin-bottom: 4px;
-        }
-
-        .job-duration {
-            display: flex;
-            align-items: center;
-            gap: 4px;
+        .job-meta {
             font-size: 11px;
             color: var(--gray-500);
         }
 
-        .empty-jobs {
-            text-align: center;
-            padding: 32px 16px;
-            color: var(--gray-500);
-        }
+        /* Job Type Colors */
+        .job-design { background: #dbeafe; color: #1e40af; border-color: #93c5fd; }
+        .job-development { background: #dcfce7; color: #166534; border-color: #86efac; }
+        .job-testing { background: #fef3c7; color: #92400e; border-color: #fde047; }
+        .job-meeting { background: #e9d5ff; color: #7c3aed; border-color: #c4b5fd; }
+        .job-review { background: #fed7aa; color: #c2410c; border-color: #fdba74; }
+        .job-planning { background: #fce7f3; color: #be185d; border-color: #f9a8d4; }
+        .job-on-call { background: #fee2e2; color: #dc2626; border-color: #fca5a5; }
 
-        .empty-jobs-icon {
-            font-size: 32px;
-            margin-bottom: 8px;
-            opacity: 0.5;
-        }
-
-        /* On-Call Card */
-        .oncall-card {
-            background: var(--white);
-            border: 1px solid var(--gray-200);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 16px;
-            box-shadow: var(--shadow);
-        }
-
-        .oncall-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .oncall-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--gray-700);
-        }
-
-        .oncall-person {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .oncall-badge {
-            background: #fef2f2;
-            color: #dc2626;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 600;
-            border: 1px solid #fca5a5;
-        }
+        /* Member Colors */
+        .member-blue { background-color: var(--primary-blue); }
+        .member-green { background-color: var(--success-green); }
+        .member-purple { background-color: #8b5cf6; }
+        .member-yellow { background-color: var(--warning-orange); }
+        .member-pink { background-color: #ec4899; }
+        .member-orange { background-color: #f97316; }
 
         /* Team Cards */
-        .team-members {
+        .team-list {
             display: flex;
             flex-direction: column;
             gap: 12px;
@@ -372,18 +354,14 @@
             transform: translateY(-1px);
         }
 
-        .team-card:active {
-            transform: scale(0.98);
-        }
-
-        .team-card-content {
+        .team-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
             margin-bottom: 12px;
         }
 
-        .team-info {
+        .member-info {
             display: flex;
             align-items: center;
             gap: 12px;
@@ -401,20 +379,18 @@
             font-weight: 700;
         }
 
-        .team-details h3 {
+        .member-text h3 {
             font-size: 16px;
             font-weight: 600;
-            color: var(--gray-900);
-            margin: 0 0 2px 0;
+            margin-bottom: 2px;
         }
 
-        .team-details p {
+        .member-text p {
             font-size: 12px;
             color: var(--gray-500);
-            margin: 0;
         }
 
-        .task-counter {
+        .task-count {
             text-align: right;
         }
 
@@ -422,7 +398,6 @@
             font-size: 24px;
             font-weight: 700;
             color: var(--gray-700);
-            line-height: 1;
         }
 
         .task-label {
@@ -430,177 +405,76 @@
             color: var(--gray-500);
         }
 
-        /* Workload Bar */
-        .workload-visualization {
-            display: flex;
-            gap: 1px;
-            height: 8px;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .workload-day {
-            flex: 1;
-            min-width: 2px;
-            position: relative;
-        }
-
-        .today-indicator {
-            position: absolute;
-            inset: -2px;
-            border: 2px solid var(--primary-blue);
-            border-radius: 4px;
-        }
-
-        /* Individual Calendar */
-        .calendar-section {
-            background: var(--white);
-            border: 1px solid var(--gray-200);
+        /* Error and Empty States */
+        .error-state {
+            text-align: center;
+            padding: 40px 20px;
+            background: #fef2f2;
+            border: 1px solid #fca5a5;
             border-radius: 12px;
-            padding: 16px;
-            box-shadow: var(--shadow);
-            margin-top: 16px;
+            margin: 16px 0;
         }
 
-        .week-days {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 4px;
+        .error-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .error-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #dc2626;
             margin-bottom: 8px;
         }
 
-        .week-day {
-            text-align: center;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--gray-600);
-            padding: 8px 0;
+        .error-message {
+            font-size: 14px;
+            color: #991b1b;
+            margin-bottom: 16px;
         }
 
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 4px;
-        }
-
-        .calendar-day {
-            height: 52px;
-            border: 1px solid var(--gray-200);
-            border-radius: 6px;
-            padding: 2px;
-            position: relative;
-            background: var(--white);
-            cursor: pointer;
-            transition: all 0.2s ease;
-            overflow: hidden;
-        }
-
-        .calendar-day:hover {
-            background: var(--gray-50);
-            box-shadow: var(--shadow);
-        }
-
-        .calendar-day.weekend {
-            background: var(--gray-50);
-        }
-
-        .calendar-day.today {
-            border: 2px solid var(--primary-blue);
-            background: #eff6ff;
-        }
-
-        .day-number {
-            position: absolute;
-            top: 2px;
-            left: 4px;
-            font-size: 10px;
-            color: var(--gray-600);
-            font-weight: 600;
-        }
-
-        .today .day-number {
-            background: var(--primary-blue);
+        .retry-button {
+            background: #dc2626;
             color: var(--white);
-            padding: 1px 4px;
-            border-radius: 3px;
-            font-size: 9px;
-        }
-
-        .day-jobs {
-            margin-top: 14px;
-            display: flex;
-            flex-direction: column;
-            gap: 1px;
-        }
-
-        .mini-job {
-            padding: 1px 3px;
-            border-radius: 3px;
-            font-size: 8px;
+            border: none;
+            padding: 8px 16px;
+            border-radius: var(--border-radius);
+            font-size: 14px;
             font-weight: 600;
-            border: 1px solid;
             cursor: pointer;
-            transition: opacity 0.2s;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
         }
 
-        .mini-job:hover {
-            opacity: 0.8;
-        }
-
-        .more-jobs {
-            font-size: 7px;
-            color: var(--gray-500);
+        .empty-state {
             text-align: center;
-            cursor: pointer;
+            padding: 32px 16px;
+            color: var(--gray-500);
         }
 
-        /* Job Type Colors */
-        .job-design { 
-            background: #dbeafe; 
-            color: #1e40af; 
-            border-color: #93c5fd; 
-        }
-        .job-development { 
-            background: #dcfce7; 
-            color: #166534; 
-            border-color: #86efac; 
-        }
-        .job-testing { 
-            background: #fef3c7; 
-            color: #92400e; 
-            border-color: #fde047; 
-        }
-        .job-meeting { 
-            background: #e9d5ff; 
-            color: #7c3aed; 
-            border-color: #c4b5fd; 
-        }
-        .job-review { 
-            background: #fed7aa; 
-            color: #c2410c; 
-            border-color: #fdba74; 
-        }
-        .job-planning { 
-            background: #fce7f3; 
-            color: #be185d; 
-            border-color: #f9a8d4; 
-        }
-        .job-on-call { 
-            background: #fee2e2; 
-            color: #dc2626; 
-            border-color: #fca5a5; 
+        /* Debug Panel */
+        .debug-panel {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: var(--border-radius);
+            padding: 12px;
+            margin: 16px 0;
+            font-size: 12px;
         }
 
-        /* Member Colors */
-        .member-blue { background-color: var(--primary-blue); }
-        .member-green { background-color: var(--success-green); }
-        .member-purple { background-color: #8b5cf6; }
-        .member-yellow { background-color: var(--warning-orange); }
-        .member-pink { background-color: #ec4899; }
-        .member-orange { background-color: #f97316; }
+        .debug-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #0369a1;
+        }
+
+        .debug-info {
+            background: var(--white);
+            padding: 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
 
         /* Modals */
         .modal-overlay {
@@ -609,24 +483,19 @@
             background: rgba(0, 0, 0, 0.5);
             z-index: 1000;
             display: flex;
-            align-items: flex-end;
+            align-items: center;
             justify-content: center;
-            padding: 0;
+            padding: 16px;
         }
 
         .modal {
             background: var(--white);
-            border-radius: 16px 16px 0 0;
+            border-radius: 12px;
+            max-width: 400px;
             width: 100%;
-            max-width: 428px;
-            max-height: 85vh;
-            overflow: hidden;
-            transform: translateY(100%);
-            transition: transform 0.3s ease;
-        }
-
-        .modal.show {
-            transform: translateY(0);
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
         }
 
         .modal-header {
@@ -636,81 +505,29 @@
             padding: 16px;
             border-bottom: 1px solid var(--gray-200);
             background: var(--gray-50);
+            border-radius: 12px 12px 0 0;
         }
 
         .modal-title {
             font-size: 18px;
-            font-weight: 700;
-            color: var(--gray-900);
+            font-weight: 600;
         }
 
         .modal-body {
             padding: 16px;
-            overflow-y: auto;
-            max-height: calc(85vh - 80px);
-        }
-
-        /* Member Selection */
-        .member-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .member-option {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
-            border: 1px solid var(--gray-200);
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            transition: all 0.2s ease;
-            background: var(--white);
-        }
-
-        .member-option:hover {
-            background: var(--gray-50);
-            border-color: var(--gray-300);
-        }
-
-        .member-option:active {
-            transform: scale(0.98);
-        }
-
-        .member-option.selected {
-            background: #eff6ff;
-            border-color: var(--primary-blue);
         }
 
         /* Settings */
-        .settings-section {
-            margin-bottom: 24px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--gray-200);
-        }
-
-        .settings-section:last-child {
-            border-bottom: none;
-        }
-
-        .section-title {
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--gray-800);
-            margin-bottom: 12px;
-        }
-
         .form-group {
-            margin-bottom: 12px;
+            margin-bottom: 16px;
         }
 
         .form-label {
             display: block;
             font-size: 14px;
             font-weight: 600;
-            color: var(--gray-700);
             margin-bottom: 6px;
+            color: var(--gray-700);
         }
 
         .form-input {
@@ -720,7 +537,6 @@
             border-radius: var(--border-radius);
             font-size: 14px;
             transition: border-color 0.2s ease;
-            background: var(--white);
         }
 
         .form-input:focus {
@@ -735,20 +551,6 @@
             margin-top: 4px;
         }
 
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            padding: 8px 0;
-        }
-
-        .checkbox {
-            width: 18px;
-            height: 18px;
-            accent-color: var(--primary-blue);
-        }
-
         .primary-button {
             width: 100%;
             padding: 12px;
@@ -760,6 +562,7 @@
             font-weight: 600;
             cursor: pointer;
             transition: background-color 0.2s ease;
+            margin-bottom: 8px;
         }
 
         .primary-button:hover {
@@ -771,55 +574,7 @@
             cursor: not-allowed;
         }
 
-        .secondary-button {
-            width: 100%;
-            padding: 12px;
-            background: var(--white);
-            color: var(--gray-700);
-            border: 1px solid var(--gray-300);
-            border-radius: var(--border-radius);
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            margin-bottom: 8px;
-        }
-
-        .secondary-button:hover {
-            background: var(--gray-50);
-            border-color: var(--gray-400);
-        }
-
-        /* Legend */
-        .legend {
-            background: var(--white);
-            padding: 16px;
-            border-top: 1px solid var(--gray-200);
-        }
-
-        .legend-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--gray-800);
-            margin-bottom: 8px;
-        }
-
-        .legend-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-
-        .legend-item {
-            padding: 8px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            text-align: center;
-            border: 1px solid;
-        }
-
-        /* Toast Notifications */
+        /* Toast */
         .toast {
             position: fixed;
             top: 20px;
@@ -844,34 +599,7 @@
         .toast-error { background: var(--error-red); color: var(--white); }
         .toast-info { background: var(--primary-blue); color: var(--white); }
 
-        /* Utility Classes */
         .hidden { display: none !important; }
-        .text-center { text-align: center; }
-        
-        /* Loading Spinner */
-        .spinner {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid transparent;
-            border-top: 2px solid currentColor;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Responsive Design */
-        @media (max-width: 375px) {
-            .app-container {
-                max-width: 100%;
-            }
-            .main-content {
-                padding: 12px;
-            }
-        }
     </style>
 </head>
 <body>
@@ -879,379 +607,609 @@
         <!-- Header -->
         <header class="app-header">
             <div class="header-row">
-                <button class="icon-button" id="menuButton" aria-label="Open menu">
+                <button class="icon-button" id="refreshButton" title="Refresh Data">
                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M3 12h18M3 6h18M3 18h18"/>
+                        <path d="M1 4v6h6M23 20v-6h-6"/>
+                        <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/>
                     </svg>
                 </button>
                 
-                <nav class="month-navigation">
-                    <button class="icon-button" id="prevButton" aria-label="Previous month">
+                <div class="month-nav">
+                    <button class="icon-button" id="prevButton">
                         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path d="M15 18l-6-6 6-6"/>
                         </svg>
                     </button>
-                    <h1 class="month-title" id="monthTitle">March 2024</h1>
-                    <button class="icon-button" id="nextButton" aria-label="Next month">
+                    <h1 class="month-title" id="monthTitle">April 2024</h1>
+                    <button class="icon-button" id="nextButton">
                         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path d="M9 18l6-6-6-6"/>
                         </svg>
                     </button>
-                </nav>
+                </div>
                 
-                <button class="icon-button" id="settingsButton" aria-label="Open settings">
+                <button class="icon-button" id="settingsButton" title="Settings">
                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <circle cx="12" cy="12" r="3"/>
-                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
                     </svg>
                 </button>
             </div>
             
-            <div class="member-info-bar hidden" id="memberInfoBar">
-                <div class="avatar member-blue" id="selectedAvatar">SM</div>
-                <div class="member-details">
-                    <h3 id="selectedName">Sarah Martinez</h3>
-                    <p id="selectedRole">UI/UX Designer</p>
-                </div>
+            <div class="status-bar" id="statusBar">
+                <div class="status-dot status-local" id="statusDot"></div>
+                <span id="statusText">Using sample data</span>
             </div>
         </header>
 
         <!-- Main Content -->
         <main class="main-content">
-            <!-- Team Overview -->
-            <div id="teamOverview">
-                <div class="page-title">
-                    Team Overview - Select a member for detailed view
-                </div>
-                
-                <!-- Today's Jobs Card -->
-                <div class="todays-jobs-card">
+            <!-- File Upload Area -->
+            <div class="file-upload-area" id="fileUploadArea">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">Drop Excel file here or click to browse</div>
+                <div class="upload-subtext">Supports .xlsx and .xls files</div>
+                <input type="file" id="fileInput" class="file-input" accept=".xlsx,.xls">
+            </div>
+
+            <!-- Loading Screen -->
+            <div id="loadingScreen" class="loading-screen hidden">
+                <div class="spinner"></div>
+                <h3>Processing Excel Data...</h3>
+                <p style="color: var(--gray-500); margin-top: 8px;">Reading worksheets</p>
+            </div>
+
+            <!-- Error Screen -->
+            <div id="errorScreen" class="error-state hidden">
+                <div class="error-icon">⚠️</div>
+                <h3 class="error-title">Failed to Load Excel Data</h3>
+                <p class="error-message" id="errorMessage">Could not process the Excel file</p>
+                <button class="retry-button" id="retryButton">Try Again</button>
+                <button class="primary-button" style="margin-top: 8px;" id="useSampleButton">Use Sample Data</button>
+            </div>
+
+            <!-- Main App -->
+            <div id="mainApp">
+                <!-- Today's Jobs -->
+                <div class="todays-jobs">
                     <div class="card-header">
-                        <h2 class="card-title">📅 Today's Scheduled Jobs</h2>
+                        <h2 class="card-title">
+                            📅 Today's Scheduled Jobs
+                        </h2>
                         <div class="job-count-badge" id="todayJobCount">0</div>
                     </div>
-                    <div class="jobs-list" id="todayJobsList">
-                        <!-- Jobs populated by JavaScript -->
-                    </div>
-                </div>
-                
-                <!-- On-Call Card -->
-                <div class="oncall-card">
-                    <div class="oncall-header">
-                        <h3 class="oncall-title">🚨 Today's On-Call</h3>
-                        <div class="oncall-person" id="onCallInfo">
-                            <div class="avatar member-pink">LW</div>
-                            <div class="member-details">
-                                <h3>Lisa Wong</h3>
-                                <p>Project Manager</p>
-                            </div>
-                            <div class="oncall-badge">On-Call</div>
+                    <div class="jobs-container" id="todayJobsList">
+                        <div class="empty-state">
+                            <div style="font-size: 24px; margin-bottom: 8px;">📋</div>
+                            <div>No jobs scheduled for today</div>
                         </div>
                     </div>
                 </div>
-                
+
+                <!-- On-Call Display -->
+                <div class="todays-jobs">
+                    <div class="card-header">
+                        <h2 class="card-title">🚨 Today's On-Call</h2>
+                    </div>
+                    <div class="jobs-container" id="onCallDisplay">
+                        <div class="empty-state">No one assigned</div>
+                    </div>
+                </div>
+
                 <!-- Team Members -->
-                <h2 style="font-size: 18px; font-weight: 700; color: var(--gray-800); margin: 16px 0 12px;">Team Members</h2>
-                <div class="team-members" id="teamMembersList">
+                <h2 style="font-size: 18px; font-weight: 700; margin: 16px 0 12px;">Team Members</h2>
+                <div class="team-list" id="teamList">
                     <!-- Team members populated by JavaScript -->
                 </div>
-            </div>
-            
-            <!-- Individual Calendar -->
-            <div id="individualCalendar" class="hidden">
-                <!-- Today's Jobs for Member -->
-                <div class="todays-jobs-card">
-                    <div class="card-header">
-                        <h2 class="card-title" id="memberTodayTitle">📋 Today's Schedule</h2>
-                        <div class="job-count-badge" id="memberJobCount">0</div>
-                    </div>
-                    <div class="jobs-list" id="memberTodayJobs">
-                        <!-- Member's jobs populated by JavaScript -->
-                    </div>
-                </div>
-                
-                <!-- Calendar Grid -->
-                <div class="calendar-section">
-                    <div class="week-days">
-                        <div class="week-day">S</div>
-                        <div class="week-day">M</div>
-                        <div class="week-day">T</div>
-                        <div class="week-day">W</div>
-                        <div class="week-day">T</div>
-                        <div class="week-day">F</div>
-                        <div class="week-day">S</div>
-                    </div>
-                    <div class="calendar-grid" id="calendarGrid">
-                        <!-- Calendar days populated by JavaScript -->
+
+                <!-- Debug Panel -->
+                <div class="debug-panel" id="debugPanel" style="display: none;">
+                    <div class="debug-title">🔍 Debug Information</div>
+                    <div class="debug-info" id="debugInfo">
+                        Excel loading status and data parsing details will appear here...
                     </div>
                 </div>
             </div>
         </main>
-
-        <!-- Legend -->
-        <footer class="legend">
-            <h3 class="legend-title">Job Types</h3>
-            <div class="legend-grid">
-                <div class="legend-item job-design">Design</div>
-                <div class="legend-item job-development">Development</div>
-                <div class="legend-item job-testing">Testing</div>
-                <div class="legend-item job-meeting">Meeting</div>
-                <div class="legend-item job-review">Review</div>
-                <div class="legend-item job-planning">Planning</div>
-                <div class="legend-item job-on-call">On-Call</div>
-            </div>
-        </footer>
-    </div>
-
-    <!-- Member Selection Modal -->
-    <div class="modal-overlay hidden" id="memberModal">
-        <div class="modal">
-            <div class="modal-header">
-                <h2 class="modal-title">Select Team Member</h2>
-                <button class="icon-button" id="closeMemberModal">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M18 6L6 18M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="member-list" id="memberList">
-                    <!-- Members populated by JavaScript -->
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- Settings Modal -->
     <div class="modal-overlay hidden" id="settingsModal">
         <div class="modal">
             <div class="modal-header">
-                <h2 class="modal-title">Settings</h2>
-                <button class="icon-button" id="closeSettingsModal">
+                <h2 class="modal-title">Settings & Debug</h2>
+                <button class="icon-button" id="closeSettings">
                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path d="M18 6L6 18M6 6l12 12"/>
                     </svg>
                 </button>
             </div>
             <div class="modal-body">
-                <div class="settings-section">
-                    <h3 class="section-title">OneDrive Integration</h3>
-                    <div class="form-group">
-                        <label class="form-label" for="fileId">Excel File ID or Share Link</label>
-                        <input type="text" id="fileId" class="form-input" placeholder="OneDrive file ID or share link">
-                        <small class="form-help">Get this from OneDrive by sharing your Excel file</small>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="fileName">File Name</label>
-                        <input type="text" id="fileName" class="form-input" placeholder="TeamCalendar_2024-03.xlsx">
-                        <small class="form-help">Name of your Excel file in OneDrive</small>
-                    </div>
+                <div class="form-group">
+                    <label class="form-label">Current Date (for testing)</label>
+                    <input type="date" id="currentDate" class="form-input" value="2024-04-12">
+                    <small class="form-help">Change the current date to test different days</small>
                 </div>
 
-                <div class="settings-section">
-                    <h3 class="section-title">Preferences</h3>
-                    <label class="checkbox-group">
-                        <input type="checkbox" id="autoSync" class="checkbox" checked>
-                        <span>Auto-sync with OneDrive</span>
-                    </label>
-                    <label class="checkbox-group">
-                        <input type="checkbox" id="notifications" class="checkbox">
-                        <span>Enable notifications</span>
-                    </label>
-                </div>
-
-                <button class="secondary-button" id="testConnection">Test OneDrive Connection</button>
+                <button class="primary-button" id="toggleDebug">Toggle Debug Mode</button>
+                <button class="primary-button" id="clearData">Clear All Data</button>
                 <button class="primary-button" id="saveSettings">Save Settings</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Job Details Modal -->
-    <div class="modal-overlay hidden" id="jobModal">
-        <div class="modal">
-            <div class="modal-header">
-                <h2 class="modal-title">Job Details</h2>
-                <button class="icon-button" id="closeJobModal">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M18 6L6 18M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
-            <div class="modal-body" id="jobDetails">
-                <!-- Job details populated by JavaScript -->
+                
+                <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--gray-200);">
+                    <h4 style="margin-bottom: 8px;">Quick Actions:</h4>
+                    <button class="primary-button" id="useSample">Use Sample Data</button>
+                    <button class="primary-button" id="downloadTemplate">Download Excel Template</button>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // App State
+        // Global App State
         const app = {
+            currentMonth: new Date(2024, 3, 1), // April 2024
             currentDate: new Date(2024, 3, 12), // April 12, 2024
-            currentMonth: new Date(2024, 3, 1),  // April 2024
-            selectedMember: null,
-            settings: {
-                fileId: '',
-                fileName: 'TeamCalendar_2024-04.xlsx',
-                autoSync: true,
-                notifications: false
+            teamMembers: [],
+            jobAssignments: {},
+            dataSource: 'sample', // 'sample', 'excel', or 'error'
+            debugMode: false,
+            loadedFile: null
+        };
+
+        // Color mapping for team members
+        const memberColors = ['member-blue', 'member-green', 'member-purple', 'member-yellow', 'member-pink', 'member-orange'];
+
+        // Sample Data (Fallback)
+        const sampleData = {
+            teamMembers: [
+                { id: 1, name: 'Sarah Martinez', role: 'UI/UX Designer', color: 'member-blue', avatar: 'SM' },
+                { id: 2, name: 'Alex Chen', role: 'Frontend Developer', color: 'member-green', avatar: 'AC' },
+                { id: 3, name: 'Maya Patel', role: 'Backend Developer', color: 'member-purple', avatar: 'MP' },
+                { id: 4, name: 'Jordan Kim', role: 'QA Engineer', color: 'member-yellow', avatar: 'JK' },
+                { id: 5, name: 'Lisa Wong', role: 'Project Manager', color: 'member-pink', avatar: 'LW' },
+                { id: 6, name: 'David Rodriguez', role: 'DevOps Engineer', color: 'member-orange', avatar: 'DR' }
+            ],
+            jobAssignments: {
+                1: {
+                    12: [{
+                        title: 'Client Presentation',
+                        type: 'meeting',
+                        duration: 'half',
+                        description: 'Present Q1 design deliverables',
+                        client: 'TechCorp Inc.',
+                        priority: 'High'
+                    }]
+                },
+                2: {
+                    12: [{
+                        title: 'Feature Development',
+                        type: 'development',
+                        duration: 'full',
+                        description: 'Dashboard features',
+                        client: 'TechCorp Inc.',
+                        priority: 'High'
+                    }]
+                },
+                3: {
+                    12: [{
+                        title: 'API Security Audit',
+                        type: 'review',
+                        duration: 'half',
+                        description: 'Security review',
+                        client: 'Internal',
+                        priority: 'High'
+                    }]
+                },
+                5: {
+                    12: [{
+                        title: 'On-Call Support',
+                        type: 'on-call',
+                        duration: 'full',
+                        description: 'Emergency support',
+                        client: 'Operations',
+                        priority: 'High'
+                    }]
+                }
             }
         };
 
-        // Sample Team Data
-        const teamMembers = [
-            { id: 1, name: 'Sarah Martinez', role: 'UI/UX Designer', color: 'member-blue', avatar: 'SM' },
-            { id: 2, name: 'Alex Chen', role: 'Frontend Developer', color: 'member-green', avatar: 'AC' },
-            { id: 3, name: 'Maya Patel', role: 'Backend Developer', color: 'member-purple', avatar: 'MP' },
-            { id: 4, name: 'Jordan Kim', role: 'QA Engineer', color: 'member-yellow', avatar: 'JK' },
-            { id: 5, name: 'Lisa Wong', role: 'Project Manager', color: 'member-pink', avatar: 'LW' },
-            { id: 6, name: 'David Rodriguez', role: 'DevOps Engineer', color: 'member-orange', avatar: 'DR' }
-        ];
+        // Excel Processing Functions
+        async function processExcelFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    try {
+                        debugLog('Processing Excel file...');
+                        const data = e.target.result;
+                        const workbook = XLSX.read(data, { type: 'binary' });
+                        
+                        debugLog('Workbook loaded. Sheets found:', workbook.SheetNames);
+                        
+                        // Parse the worksheets
+                        const parsedData = parseWorkbook(workbook);
+                        
+                        if (parsedData) {
+                            resolve(parsedData);
+                        } else {
+                            reject(new Error('Failed to parse Excel data'));
+                        }
+                    } catch (error) {
+                        debugLog('Excel processing error:', error.message);
+                        reject(error);
+                    }
+                };
+                
+                reader.onerror = function(error) {
+                    reject(error);
+                };
+                
+                reader.readAsBinaryString(file);
+            });
+        }
 
-        // Sample Job Assignments
-        const jobAssignments = {
-            1: { // Sarah Martinez
-                3: [{ title: 'Website Mockups', type: 'design', duration: 'full', description: 'Creating wireframes and high-fidelity mockups for new website', client: 'TechCorp Inc.', priority: 'High', estimatedHours: 8, status: 'In Progress', notes: 'Mobile-first approach with accessibility focus' }],
-                8: [{ title: 'Mobile App UI', type: 'design', duration: 'full', description: 'Designing mobile interface', client: 'StartupXYZ', priority: 'Medium', estimatedHours: 8, status: 'Not Started', notes: 'Research competitor apps' }],
-                15: [{ title: 'Design Review', type: 'meeting', duration: 'half', description: 'Present mockups to stakeholders', client: 'TechCorp Inc.', priority: 'High', estimatedHours: 4, status: 'Scheduled', notes: 'Prepare presentation deck' }]
-            },
-            2: { // Alex Chen
-                1: [{ title: 'React Components', type: 'development', duration: 'full', description: 'Building dashboard components', client: 'TechCorp Inc.', priority: 'High', estimatedHours: 8, status: 'In Progress', notes: 'Data visualization focus' }],
-                6: [{ title: 'API Integration', type: 'development', duration: 'full', description: 'Frontend API integration', client: 'TechCorp Inc.', priority: 'High', estimatedHours: 8, status: 'Not Started', notes: 'Error handling' }],
-                15: [{ title: 'Code Review', type: 'review', duration: 'half', description: 'Review team pull requests', client: 'Internal', priority: 'Medium', estimatedHours: 4, status: 'Scheduled', notes: 'Performance focus' }]
-            },
-            3: { // Maya Patel
-                2: [{ title: 'Database Schema', type: 'development', duration: 'full', description: 'Database design updates', client: 'TechCorp Inc.', priority: 'High', estimatedHours: 8, status: 'In Progress', notes: 'User permissions' }],
-                9: [{ title: 'Performance Optimization', type: 'development', duration: 'full', description: 'Optimize queries and API', client: 'Internal', priority: 'Medium', estimatedHours: 8, status: 'Not Started', notes: '50% improvement target' }],
-                15: [{ title: 'Security Review', type: 'review', duration: 'half', description: 'Security audit', client: 'Security Team', priority: 'High', estimatedHours: 4, status: 'Scheduled', notes: 'OWASP check' }]
-            },
-            4: { // Jordan Kim
-                6: [{ title: 'Automated Testing', type: 'testing', duration: 'full', description: 'Develop test automation', client: 'Multiple', priority: 'High', estimatedHours: 8, status: 'In Progress', notes: 'Integration tests' }],
-                13: [{ title: 'Bug Verification', type: 'testing', duration: 'half', description: 'Verify bug fixes', client: 'Various', priority: 'High', estimatedHours: 4, status: 'Not Started', notes: 'Critical path check' }],
-                15: [{ title: 'Release Testing', type: 'testing', duration: 'full', description: 'Final pre-release testing', client: 'TechCorp Inc.', priority: 'High', estimatedHours: 8, status: 'Scheduled', notes: 'Smoke testing' }]
-            },
-            5: { // Lisa Wong
-                1: [{ title: 'Sprint Planning', type: 'meeting', duration: 'half', description: 'Plan sprint goals', client: 'Dev Team', priority: 'High', estimatedHours: 3, status: 'Scheduled', notes: 'Review velocity' }],
-                7: [{ title: 'Stakeholder Meeting', type: 'meeting', duration: 'half', description: 'Weekly stakeholder update', client: 'Executives', priority: 'High', estimatedHours: 2, status: 'Scheduled', notes: 'Status presentation' }],
-                15: [{ title: 'On-Call Support', type: 'on-call', duration: 'full', description: 'Emergency support coverage', client: 'Operations', priority: 'High', estimatedHours: 8, status: 'Active', notes: 'Monitor production alerts' }]
-            },
-            6: { // David Rodriguez  
-                3: [{ title: 'Infrastructure Setup', type: 'development', duration: 'full', description: 'CI/CD pipeline setup', client: 'Infrastructure', priority: 'High', estimatedHours: 8, status: 'In Progress', notes: 'Monitoring and alerts' }],
-                10: [{ title: 'Performance Review', type: 'review', duration: 'half', description: 'System performance analysis', client: 'Operations', priority: 'Medium', estimatedHours: 4, status: 'Scheduled', notes: 'Resource usage analysis' }],
-                15: [{ title: 'Security Patches', type: 'development', duration: 'half', description: 'Apply security updates', client: 'Security', priority: 'High', estimatedHours: 4, status: 'Scheduled', notes: 'Maintenance window' }]
+        function parseWorkbook(workbook) {
+            const teamMembers = [];
+            const jobAssignments = {};
+            
+            // Look for Team Members sheet
+            const teamSheet = workbook.Sheets['Team'] || workbook.Sheets['Team Members'] || workbook.Sheets['Members'];
+            if (teamSheet) {
+                const teamData = XLSX.utils.sheet_to_json(teamSheet);
+                debugLog('Team data rows:', teamData.length);
+                
+                teamData.forEach((row, index) => {
+                    const name = row['Name'] || row['Member Name'] || row['Employee'];
+                    const role = row['Role'] || row['Position'] || row['Title'];
+                    
+                    if (name) {
+                        const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
+                        teamMembers.push({
+                            id: index + 1,
+                            name: name,
+                            role: role || 'Team Member',
+                            color: memberColors[index % memberColors.length],
+                            avatar: initials
+                        });
+                    }
+                });
             }
-        };
+            
+            // Look for Schedule/Calendar sheet
+            const scheduleSheet = workbook.Sheets['Schedule'] || workbook.Sheets['Calendar'] || workbook.Sheets['April'] || workbook.Sheets['Jobs'];
+            if (scheduleSheet) {
+                const scheduleData = XLSX.utils.sheet_to_json(scheduleSheet);
+                debugLog('Schedule data rows:', scheduleData.length);
+                
+                // Process schedule data
+                scheduleData.forEach(row => {
+                    // Try to find member
+                    const memberName = row['Member'] || row['Name'] || row['Employee'];
+                    const member = teamMembers.find(m => m.name === memberName);
+                    
+                    if (member) {
+                        // Parse date
+                        let day = null;
+                        if (row['Date']) {
+                            const date = new Date(row['Date']);
+                            day = date.getDate();
+                        } else if (row['Day']) {
+                            day = parseInt(row['Day']);
+                        }
+                        
+                        if (day && day >= 1 && day <= 31) {
+                            if (!jobAssignments[member.id]) {
+                                jobAssignments[member.id] = {};
+                            }
+                            if (!jobAssignments[member.id][day]) {
+                                jobAssignments[member.id][day] = [];
+                            }
+                            
+                            // Parse job details
+                            const job = {
+                                title: row['Task'] || row['Job'] || row['Title'] || 'Untitled Task',
+                                type: (row['Type'] || 'development').toLowerCase().replace(/\s+/g, '-'),
+                                duration: row['Duration'] || 'half',
+                                description: row['Description'] || '',
+                                client: row['Client'] || row['Project'] || 'Internal',
+                                priority: row['Priority'] || 'Medium'
+                            };
+                            
+                            jobAssignments[member.id][day].push(job);
+                        }
+                    }
+                });
+            }
+            
+            // If no team members found, try to create from schedule
+            if (teamMembers.length === 0 && Object.keys(jobAssignments).length === 0) {
+                debugLog('No standard format found, attempting alternative parsing...');
+                
+                // Try to parse first sheet as a calendar grid
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const range = XLSX.utils.decode_range(firstSheet['!ref']);
+                
+                // Look for team member names in first column
+                for (let row = 1; row <= Math.min(range.e.r, 20); row++) {
+                    const nameCell = firstSheet[XLSX.utils.encode_cell({r: row, c: 0})];
+                    if (nameCell && nameCell.v) {
+                        const name = String(nameCell.v).trim();
+                        if (name && name.length > 2 && !name.match(/^(Date|Day|Month|Week)/i)) {
+                            const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
+                            const memberId = teamMembers.length + 1;
+                            
+                            teamMembers.push({
+                                id: memberId,
+                                name: name,
+                                role: 'Team Member',
+                                color: memberColors[teamMembers.length % memberColors.length],
+                                avatar: initials
+                            });
+                            
+                            // Look for jobs in the row
+                            jobAssignments[memberId] = {};
+                            for (let col = 1; col <= Math.min(range.e.c, 31); col++) {
+                                const cell = firstSheet[XLSX.utils.encode_cell({r: row, c: col})];
+                                if (cell && cell.v && String(cell.v).trim()) {
+                                    const jobText = String(cell.v).trim();
+                                    if (jobText.length > 1) {
+                                        if (!jobAssignments[memberId][col]) {
+                                            jobAssignments[memberId][col] = [];
+                                        }
+                                        
+                                        // Parse job from cell text
+                                        const job = parseJobFromText(jobText);
+                                        jobAssignments[memberId][col].push(job);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            debugLog('Parsed data:', {
+                teamMembers: teamMembers.length,
+                jobAssignments: Object.keys(jobAssignments).length
+            });
+            
+            if (teamMembers.length > 0) {
+                return { teamMembers, jobAssignments };
+            }
+            
+            return null;
+        }
+
+        function parseJobFromText(text) {
+            // Try to extract job type from text
+            let type = 'development';
+            let priority = 'Medium';
+            
+            const lowerText = text.toLowerCase();
+            if (lowerText.includes('meeting')) type = 'meeting';
+            else if (lowerText.includes('design')) type = 'design';
+            else if (lowerText.includes('test')) type = 'testing';
+            else if (lowerText.includes('review')) type = 'review';
+            else if (lowerText.includes('on-call') || lowerText.includes('on call')) type = 'on-call';
+            else if (lowerText.includes('plan')) type = 'planning';
+            
+            if (lowerText.includes('high') || lowerText.includes('urgent')) priority = 'High';
+            else if (lowerText.includes('low')) priority = 'Low';
+            
+            return {
+                title: text.substring(0, 50),
+                type: type,
+                duration: text.length > 30 ? 'full' : 'half',
+                description: text,
+                client: 'Internal',
+                priority: priority
+            };
+        }
+
+        // File handling
+        function setupFileHandlers() {
+            const fileInput = document.getElementById('fileInput');
+            const uploadArea = document.getElementById('fileUploadArea');
+            
+            // Click to select file
+            uploadArea.addEventListener('click', () => {
+                fileInput.click();
+            });
+            
+            // File input change
+            fileInput.addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    await handleFileUpload(file);
+                }
+            });
+            
+            // Drag and drop
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+            
+            uploadArea.addEventListener('drop', async (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                
+                const file = e.dataTransfer.files[0];
+                if (file && (file.name.endsWith('.xlsx') || file.name.endsWith('.xls'))) {
+                    await handleFileUpload(file);
+                } else {
+                    showToast('Please upload an Excel file (.xlsx or .xls)', 'error');
+                }
+            });
+        }
+
+        async function handleFileUpload(file) {
+            updateStatus('loading', 'Processing Excel file...');
+            document.getElementById('loadingScreen').classList.remove('hidden');
+            document.getElementById('fileUploadArea').classList.add('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('errorScreen').classList.add('hidden');
+            
+            try {
+                const data = await processExcelFile(file);
+                
+                if (data && data.teamMembers.length > 0) {
+                    app.teamMembers = data.teamMembers;
+                    app.jobAssignments = data.jobAssignments;
+                    app.dataSource = 'excel';
+                    app.loadedFile = file.name;
+                    
+                    updateStatus('connected', `Loaded: ${file.name}`);
+                    showToast(`Successfully loaded ${data.teamMembers.length} team members`, 'success');
+                    
+                    document.getElementById('loadingScreen').classList.add('hidden');
+                    document.getElementById('mainApp').classList.remove('hidden');
+                    renderApp();
+                } else {
+                    throw new Error('No valid data found in Excel file');
+                }
+            } catch (error) {
+                debugLog('Error loading Excel:', error.message);
+                showError(error.message);
+            }
+        }
+
+        // Download template
+        function downloadTemplate() {
+            // Create a new workbook
+            const wb = XLSX.utils.book_new();
+            
+            // Create Team sheet
+            const teamData = [
+                ['Name', 'Role'],
+                ['Sarah Martinez', 'UI/UX Designer'],
+                ['Alex Chen', 'Frontend Developer'],
+                ['Maya Patel', 'Backend Developer'],
+                ['Jordan Kim', 'QA Engineer']
+            ];
+            const teamSheet = XLSX.utils.aoa_to_sheet(teamData);
+            XLSX.utils.book_append_sheet(wb, teamSheet, 'Team');
+            
+            // Create Schedule sheet
+            const scheduleData = [
+                ['Member', 'Day', 'Task', 'Type', 'Duration', 'Client', 'Priority'],
+                ['Sarah Martinez', 12, 'Client Presentation', 'meeting', 'half', 'TechCorp', 'High'],
+                ['Alex Chen', 12, 'Feature Development', 'development', 'full', 'TechCorp', 'High'],
+                ['Maya Patel', 12, 'API Security Audit', 'review', 'half', 'Internal', 'High'],
+                ['Jordan Kim', 12, 'QA Testing', 'testing', 'full', 'TechCorp', 'Medium']
+            ];
+            const scheduleSheet = XLSX.utils.aoa_to_sheet(scheduleData);
+            XLSX.utils.book_append_sheet(wb, scheduleSheet, 'Schedule');
+            
+            // Save the file
+            XLSX.writeFile(wb, 'TeamCalendar_Template.xlsx');
+            showToast('Template downloaded!', 'success');
+        }
 
         // Utility Functions
-        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-        
-        function getDaysInMonth(date) {
-            return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+        function updateStatus(type, message) {
+            const dot = document.getElementById('statusDot');
+            const text = document.getElementById('statusText');
+            
+            dot.className = `status-dot status-${type}`;
+            text.textContent = message;
         }
 
-        function getFirstDayOfMonth(date) {
-            return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
-        }
-
-        function isToday(day) {
-            return day === app.currentDate.getDate() && 
-                   app.currentMonth.getMonth() === app.currentDate.getMonth() &&
-                   app.currentMonth.getFullYear() === app.currentDate.getFullYear();
-        }
-
-        function isWeekend(day) {
-            const date = new Date(app.currentMonth.getFullYear(), app.currentMonth.getMonth(), day);
-            const dayOfWeek = date.getDay();
-            return dayOfWeek === 0 || dayOfWeek === 6;
-        }
-
-        function getJobTypeClass(type) {
-            return `job-${type}`;
+        function showError(message) {
+            document.getElementById('loadingScreen').classList.add('hidden');
+            document.getElementById('fileUploadArea').classList.remove('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('errorScreen').classList.remove('hidden');
+            document.getElementById('errorMessage').textContent = message;
+            
+            updateStatus('error', 'Excel loading failed');
         }
 
         function showToast(message, type = 'info') {
-            // Remove existing toasts
-            document.querySelectorAll('.toast').forEach(toast => toast.remove());
+            const existingToasts = document.querySelectorAll('.toast');
+            existingToasts.forEach(toast => toast.remove());
 
             const toast = document.createElement('div');
             toast.className = `toast toast-${type}`;
             toast.textContent = message;
             document.body.appendChild(toast);
 
-            // Show animation
             setTimeout(() => toast.classList.add('show'), 100);
-
-            // Hide after 3 seconds
             setTimeout(() => {
                 toast.classList.remove('show');
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
         }
 
-        // Data Functions
+        function debugLog(message, data = null) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            
+            console.log(logEntry, data || '');
+            
+            if (app.debugMode) {
+                const debugInfo = document.getElementById('debugInfo');
+                debugInfo.textContent += logEntry + (data ? '\n' + JSON.stringify(data, null, 2) : '') + '\n\n';
+                debugInfo.scrollTop = debugInfo.scrollHeight;
+            }
+        }
+
+        // Data Loading Functions
+        function useSampleData() {
+            debugLog('Loading sample data...');
+            
+            app.teamMembers = sampleData.teamMembers;
+            app.jobAssignments = sampleData.jobAssignments;
+            app.dataSource = 'sample';
+            
+            updateStatus('local', 'Using sample data');
+            
+            document.getElementById('loadingScreen').classList.add('hidden');
+            document.getElementById('errorScreen').classList.add('hidden');
+            document.getElementById('fileUploadArea').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            
+            renderApp();
+            showToast('Sample data loaded', 'info');
+        }
+
         function getTodaysJobs() {
             const today = app.currentDate.getDate();
             const allJobs = [];
 
-            teamMembers.forEach(member => {
-                const memberJobs = jobAssignments[member.id]?.[today] || [];
-                memberJobs.forEach(job => {
-                    allJobs.push({
-                        ...job,
-                        memberName: member.name,
-                        memberAvatar: member.avatar,
-                        memberColor: member.color,
-                        memberId: member.id
+            for (const memberId in app.jobAssignments) {
+                const memberJobs = app.jobAssignments[memberId]?.[today] || [];
+                const member = app.teamMembers.find(m => m.id === parseInt(memberId));
+                
+                if (member) {
+                    memberJobs.forEach(job => {
+                        allJobs.push({
+                            ...job,
+                            memberName: member.name,
+                            memberAvatar: member.avatar,
+                            memberColor: member.color,
+                            memberId: member.id
+                        });
                     });
-                });
-            });
+                }
+            }
 
-            // Sort by priority then type
+            // Sort by priority
             return allJobs.sort((a, b) => {
                 const priorityOrder = { 'High': 3, 'Medium': 2, 'Low': 1 };
-                const typeOrder = { 'meeting': 4, 'on-call': 3, 'development': 2, 'design': 2, 'testing': 1 };
-                
-                const aPriority = priorityOrder[a.priority] || 0;
-                const bPriority = priorityOrder[b.priority] || 0;
-                const aType = typeOrder[a.type] || 0;
-                const bType = typeOrder[b.type] || 0;
-                
-                if (aType !== bType) return bType - aType;
-                return bPriority - aPriority;
+                return (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0);
             });
-        }
-
-        function getTodaysJobsForMember(memberId) {
-            const today = app.currentDate.getDate();
-            const member = teamMembers.find(m => m.id === memberId);
-            if (!member) return [];
-
-            const memberJobs = jobAssignments[memberId]?.[today] || [];
-            return memberJobs.map(job => ({
-                ...job,
-                memberName: member.name,
-                memberAvatar: member.avatar,
-                memberColor: member.color,
-                memberId: member.id
-            }));
-        }
-
-        function getNonOnCallJobCount(memberId) {
-            const memberJobs = jobAssignments[memberId] || {};
-            return Object.values(memberJobs)
-                .flat()
-                .filter(job => job.type !== 'on-call')
-                .length;
-        }
-
-        function hasNonOnCallJobs(memberId, day) {
-            const jobs = jobAssignments[memberId]?.[day] || [];
-            return jobs.some(job => job.type !== 'on-call');
         }
 
         function getTodayOnCallPerson() {
             const today = app.currentDate.getDate();
-            for (const member of teamMembers) {
-                const memberJobs = jobAssignments[member.id]?.[today] || [];
+            
+            for (const member of app.teamMembers) {
+                const memberJobs = app.jobAssignments[member.id]?.[today] || [];
                 if (memberJobs.some(job => job.type === 'on-call')) {
                     return member;
                 }
@@ -1260,536 +1218,236 @@
         }
 
         // Render Functions
-        function updateMonthTitle() {
-            document.getElementById('monthTitle').textContent = 
-                `${monthNames[app.currentMonth.getMonth()]} ${app.currentMonth.getFullYear()}`;
-        }
+        function renderTodaysJobs() {
+            const jobs = getTodaysJobs();
+            const container = document.getElementById('todayJobsList');
+            const countBadge = document.getElementById('todayJobCount');
 
-        function renderTodaysJobs(containerId, jobs, showMemberInfo = true) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = '';
+            countBadge.textContent = jobs.length;
 
             if (jobs.length === 0) {
                 container.innerHTML = `
-                    <div class="empty-jobs">
-                        <div class="empty-jobs-icon">📅</div>
+                    <div class="empty-state">
+                        <div style="font-size: 24px; margin-bottom: 8px;">📋</div>
                         <div>No jobs scheduled for today</div>
                     </div>
                 `;
                 return;
             }
 
-            jobs.forEach(job => {
-                const jobElement = document.createElement('div');
-                jobElement.className = `job-item ${job.type === 'on-call' ? 'on-call' : ''}`;
-                jobElement.onclick = () => showJobDetails(job, app.currentDate.getDate(), job.memberName);
+            container.innerHTML = '';
 
-                jobElement.innerHTML = `
-                    <div class="job-content">
+            jobs.forEach(job => {
+                const jobEl = document.createElement('div');
+                jobEl.className = 'job-item';
+                
+                jobEl.innerHTML = `
+                    <div class="job-avatar ${job.memberColor}">${job.memberAvatar}</div>
+                    <div class="job-details">
                         <div class="job-header">
-                            <div class="job-type-badge ${getJobTypeClass(job.type)}">
+                            <div class="job-type-badge job-${job.type}">
                                 ${job.type.charAt(0).toUpperCase() + job.type.slice(1)}
                             </div>
                             <div class="priority-badge priority-${job.priority.toLowerCase()}">
                                 ${job.priority}
                             </div>
                         </div>
-                        
                         <div class="job-title">${job.title}</div>
-                        ${showMemberInfo ? `<div class="job-member">${job.memberName}</div>` : ''}
-                        <div class="job-client">${job.client}</div>
-                        
-                        <div class="job-duration">
-                            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <circle cx="12" cy="12" r="10"/>
-                                <polyline points="12,6 12,12 16,14"/>
-                            </svg>
-                            ${job.duration === 'full' ? 'Full Day' : 'Half Day'} (${job.estimatedHours}h)
-                        </div>
+                        <div class="job-meta">${job.memberName} • ${job.client}</div>
                     </div>
-                    ${showMemberInfo ? `<div class="avatar ${job.memberColor}">${job.memberAvatar}</div>` : ''}
                 `;
-
-                container.appendChild(jobElement);
+                
+                container.appendChild(jobEl);
             });
         }
 
-        function renderTeamOverview() {
-            const todaysJobs = getTodaysJobs();
-            
-            // Update today's jobs count
-            document.getElementById('todayJobCount').textContent = todaysJobs.length;
-            
-            // Render today's jobs
-            renderTodaysJobs('todayJobsList', todaysJobs, true);
+        function renderOnCall() {
+            const onCallPerson = getTodayOnCallPerson();
+            const container = document.getElementById('onCallDisplay');
 
-            // Render team members
-            const container = document.getElementById('teamMembersList');
+            if (onCallPerson) {
+                container.innerHTML = `
+                    <div class="job-item" style="border: none; background: #fef2f2;">
+                        <div class="job-avatar ${onCallPerson.color}">${onCallPerson.avatar}</div>
+                        <div class="job-details">
+                            <div class="job-title">${onCallPerson.name}</div>
+                            <div class="job-meta">${onCallPerson.role}</div>
+                            <div class="job-meta" style="color: #dc2626; font-weight: 600;">
+                                🚨 Available for emergency support
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div>No one assigned</div>
+                    </div>
+                `;
+            }
+        }
+
+        function renderTeamList() {
+            const container = document.getElementById('teamList');
             container.innerHTML = '';
 
-            teamMembers.forEach(member => {
-                const taskCount = getNonOnCallJobCount(member.id);
-                const daysInMonth = getDaysInMonth(app.currentMonth);
+            app.teamMembers.forEach(member => {
+                const taskCount = Object.values(app.jobAssignments[member.id] || {})
+                    .flat()
+                    .filter(job => job.type !== 'on-call')
+                    .length;
 
                 const card = document.createElement('div');
                 card.className = 'team-card';
-                card.onclick = () => selectMember(member);
-
-                // Generate workload bar
-                let workloadBar = '';
-                for (let day = 1; day <= daysInMonth; day++) {
-                    const hasJobs = hasNonOnCallJobs(member.id, day);
-                    const weekend = isWeekend(day);
-                    const today = isToday(day);
-                    
-                    let dayClass = 'workload-day ';
-                    if (hasJobs) {
-                        dayClass += member.color;
-                    } else {
-                        dayClass += weekend ? 'member-gray' : 'member-gray';
-                    }
-                    
-                    workloadBar += `<div class="${dayClass}" style="background-color: ${hasJobs ? getMemberColor(member.color) : (weekend ? '#e5e7eb' : '#f3f4f6')}">${today ? '<div class="today-indicator"></div>' : ''}</div>`;
-                }
-
+                
                 card.innerHTML = `
-                    <div class="team-card-content">
-                        <div class="team-info">
+                    <div class="team-header">
+                        <div class="member-info">
                             <div class="team-avatar ${member.color}">${member.avatar}</div>
-                            <div class="team-details">
+                            <div class="member-text">
                                 <h3>${member.name}</h3>
                                 <p>${member.role}</p>
                             </div>
                         </div>
-                        <div class="task-counter">
+                        <div class="task-count">
                             <div class="task-number">${taskCount}</div>
                             <div class="task-label">tasks</div>
                         </div>
                     </div>
-                    <div class="workload-visualization">${workloadBar}</div>
                 `;
 
                 container.appendChild(card);
             });
         }
 
-        function renderIndividualCalendar() {
-            if (!app.selectedMember) return;
-
-            // Update member's today jobs
-            const memberTodaysJobs = getTodaysJobsForMember(app.selectedMember.id);
-            document.getElementById('memberJobCount').textContent = memberTodaysJobs.length;
-            document.getElementById('memberTodayTitle').textContent = `📋 ${app.selectedMember.name}'s Today`;
-            renderTodaysJobs('memberTodayJobs', memberTodaysJobs, false);
-
-            // Render calendar grid
-            const grid = document.getElementById('calendarGrid');
-            grid.innerHTML = '';
-
-            const daysInMonth = getDaysInMonth(app.currentMonth);
-            const firstDay = getFirstDayOfMonth(app.currentMonth);
-
-            // Empty cells before month starts
-            for (let i = 0; i < firstDay; i++) {
-                const emptyCell = document.createElement('div');
-                emptyCell.className = 'calendar-day';
-                grid.appendChild(emptyCell);
-            }
-
-            // Calendar days
-            for (let day = 1; day <= daysInMonth; day++) {
-                const cell = document.createElement('div');
-                let classes = 'calendar-day';
-                
-                if (isWeekend(day)) classes += ' weekend';
-                if (isToday(day)) classes += ' today';
-                
-                cell.className = classes;
-
-                // Day number
-                const dayNum = document.createElement('div');
-                dayNum.className = 'day-number';
-                dayNum.textContent = day;
-                cell.appendChild(dayNum);
-
-                // Jobs for this day
-                const jobs = jobAssignments[app.selectedMember.id]?.[day] || [];
-                const jobsContainer = document.createElement('div');
-                jobsContainer.className = 'day-jobs';
-
-                jobs.slice(0, 2).forEach(job => {
-                    const jobEl = document.createElement('div');
-                    jobEl.className = `mini-job ${getJobTypeClass(job.type)}`;
-                    jobEl.textContent = job.title;
-                    jobEl.onclick = (e) => {
-                        e.stopPropagation();
-                        showJobDetails(job, day, app.selectedMember.name);
-                    };
-                    jobsContainer.appendChild(jobEl);
-                });
-
-                if (jobs.length > 2) {
-                    const moreEl = document.createElement('div');
-                    moreEl.className = 'more-jobs';
-                    moreEl.textContent = `+${jobs.length - 2}`;
-                    moreEl.onclick = (e) => {
-                        e.stopPropagation();
-                        showMultipleJobDetails(jobs, day, app.selectedMember.name);
-                    };
-                    jobsContainer.appendChild(moreEl);
-                }
-
-                cell.appendChild(jobsContainer);
-                grid.appendChild(cell);
-            }
+        function renderApp() {
+            debugLog('Rendering app with current data...');
+            renderTodaysJobs();
+            renderOnCall();
+            renderTeamList();
         }
 
-        function renderMemberSelection() {
-            const container = document.getElementById('memberList');
-            container.innerHTML = '';
-
-            // All members option
-            const allOption = document.createElement('div');
-            allOption.className = `member-option ${!app.selectedMember ? 'selected' : ''}`;
-            allOption.innerHTML = `
-                <div class="avatar" style="background-color: var(--gray-500);">All</div>
-                <div class="member-details">
-                    <h3>All Team Members</h3>
-                    <p>Overview Mode</p>
-                </div>
-            `;
-            allOption.onclick = () => {
-                selectMember(null);
-                closeModal('memberModal');
-            };
-            container.appendChild(allOption);
-
-            // Individual members
-            teamMembers.forEach(member => {
-                const option = document.createElement('div');
-                option.className = `member-option ${app.selectedMember?.id === member.id ? 'selected' : ''}`;
-                option.innerHTML = `
-                    <div class="avatar ${member.color}">${member.avatar}</div>
-                    <div class="member-details">
-                        <h3>${member.name}</h3>
-                        <p>${member.role}</p>
-                    </div>
-                `;
-                option.onclick = () => {
-                    selectMember(member);
-                    closeModal('memberModal');
-                };
-                container.appendChild(option);
-            });
-        }
-
-        function showJobDetails(job, day, memberName) {
-            const container = document.getElementById('jobDetails');
-            const priorityClass = `priority-${job.priority.toLowerCase()}`;
-            
-            container.innerHTML = `
-                <div style="margin-bottom: 16px;">
-                    <div style="font-size: 14px; color: var(--gray-600); margin-bottom: 12px;">
-                        <strong>${memberName}</strong> - March ${day}
-                    </div>
-                    
-                    <div class="job-type-badge ${getJobTypeClass(job.type)}" style="margin-bottom: 12px;">
-                        ${job.type.charAt(0).toUpperCase() + job.type.slice(1)}
-                    </div>
-                    
-                    <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 8px; color: var(--gray-900);">
-                        ${job.title}
-                    </h3>
-                    
-                    <p style="color: var(--gray-700); margin-bottom: 20px; line-height: 1.5;">
-                        ${job.description}
-                    </p>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
-                        <div>
-                            <div style="color: var(--gray-500); font-size: 14px; font-weight: 600;">Client:</div>
-                            <div style="font-weight: 600; margin-top: 2px;">${job.client}</div>
-                        </div>
-                        <div>
-                            <div style="color: var(--gray-500); font-size: 14px; font-weight: 600;">Duration:</div>
-                            <div style="font-weight: 600; margin-top: 2px;">
-                                ${job.duration === 'full' ? 'Full Day' : 'Half Day'} (${job.estimatedHours}h)
-                            </div>
-                        </div>
-                        <div>
-                            <div style="color: var(--gray-500); font-size: 14px; font-weight: 600;">Priority:</div>
-                            <div class="${priorityClass}" style="font-weight: 600; margin-top: 2px;">${job.priority}</div>
-                        </div>
-                        <div>
-                            <div style="color: var(--gray-500); font-size: 14px; font-weight: 600;">Status:</div>
-                            <div style="font-weight: 600; margin-top: 2px; color: ${getStatusColor(job.status)};">
-                                ${job.status}
-                            </div>
-                        </div>
-                    </div>
-                    
-                    ${job.notes ? `
-                        <div>
-                            <div style="color: var(--gray-500); font-size: 14px; font-weight: 600; margin-bottom: 8px;">Notes:</div>
-                            <div style="background: var(--gray-50); padding: 12px; border-radius: 8px; border: 1px solid var(--gray-200); color: var(--gray-700);">
-                                ${job.notes}
-                            </div>
-                        </div>
-                    ` : ''}
-                </div>
-            `;
-            
-            showModal('jobModal');
-        }
-
-        function showMultipleJobDetails(jobs, day, memberName) {
-            const container = document.getElementById('jobDetails');
-            const jobsHtml = jobs.map(job => `
-                <div style="border: 1px solid var(--gray-200); border-radius: 8px; padding: 12px; margin-bottom: 12px; background: var(--white);">
-                    <div class="job-type-badge ${getJobTypeClass(job.type)}" style="margin-bottom: 8px;">
-                        ${job.type.charAt(0).toUpperCase() + job.type.slice(1)}
-                    </div>
-                    <h4 style="font-weight: 600; margin-bottom: 4px;">${job.title}</h4>
-                    <p style="font-size: 14px; color: var(--gray-600); margin-bottom: 8px;">${job.description}</p>
-                    <div style="font-size: 12px; color: var(--gray-500);">
-                        <strong>Client:</strong> ${job.client} | 
-                        <strong>Duration:</strong> ${job.duration === 'full' ? 'Full Day' : 'Half Day'} | 
-                        <strong>Priority:</strong> ${job.priority}
-                    </div>
-                    ${job.notes ? `<div style="margin-top: 8px; padding: 8px; background: var(--gray-50); border-radius: 6px; font-size: 12px;"><strong>Notes:</strong> ${job.notes}</div>` : ''}
-                </div>
-            `).join('');
-
-            container.innerHTML = `
-                <div style="margin-bottom: 16px;">
-                    <div style="font-size: 14px; color: var(--gray-600); margin-bottom: 12px;">
-                        <strong>${memberName}</strong> - March ${day}
-                    </div>
-                    ${jobsHtml}
-                </div>
-            `;
-            
-            showModal('jobModal');
-        }
-
-        function getMemberColor(colorClass) {
-            const colors = {
-                'member-blue': '#3b82f6',
-                'member-green': '#10b981',
-                'member-purple': '#8b5cf6',
-                'member-yellow': '#f59e0b',
-                'member-pink': '#ec4899',
-                'member-orange': '#f97316'
-            };
-            return colors[colorClass] || '#6b7280';
-        }
-
-        function getStatusColor(status) {
-            switch (status) {
-                case 'Active': return 'var(--success-green)';
-                case 'In Progress': return 'var(--primary-blue)';
-                case 'Scheduled': return '#7c3aed';
-                default: return 'var(--gray-600)';
-            }
-        }
-
-        // Event Handlers
-        function selectMember(member) {
-            app.selectedMember = member;
-            
-            if (member) {
-                // Show member info in header
-                document.getElementById('memberInfoBar').classList.remove('hidden');
-                document.getElementById('selectedAvatar').className = `avatar ${member.color}`;
-                document.getElementById('selectedAvatar').textContent = member.avatar;
-                document.getElementById('selectedName').textContent = member.name;
-                document.getElementById('selectedRole').textContent = member.role;
-                
-                // Switch to individual view
-                document.getElementById('teamOverview').classList.add('hidden');
-                document.getElementById('individualCalendar').classList.remove('hidden');
-                renderIndividualCalendar();
-            } else {
-                // Hide member info
-                document.getElementById('memberInfoBar').classList.add('hidden');
-                
-                // Switch to team view
-                document.getElementById('teamOverview').classList.remove('hidden');
-                document.getElementById('individualCalendar').classList.add('hidden');
-                renderTeamOverview();
-            }
-        }
-
-        function navigateMonth(direction) {
-            app.currentMonth = new Date(app.currentMonth.getFullYear(), app.currentMonth.getMonth() + direction, 1);
-            updateMonthTitle();
-            
-            if (app.selectedMember) {
-                renderIndividualCalendar();
-            } else {
-                renderTeamOverview();
-            }
-        }
-
-        function showModal(modalId) {
-            const modal = document.getElementById(modalId);
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                modal.querySelector('.modal').classList.add('show');
-            }, 10);
+        // Settings Functions
+        function openSettings() {
+            document.getElementById('settingsModal').classList.remove('hidden');
+            document.getElementById('currentDate').value = app.currentDate.toISOString().split('T')[0];
         }
 
         function closeModal(modalId) {
-            const modal = document.getElementById(modalId);
-            modal.querySelector('.modal').classList.remove('show');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 300);
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        function toggleDebug() {
+            app.debugMode = !app.debugMode;
+            const panel = document.getElementById('debugPanel');
+            panel.style.display = app.debugMode ? 'block' : 'none';
+            
+            showToast(app.debugMode ? 'Debug mode enabled' : 'Debug mode disabled', 'info');
         }
 
         function saveSettings() {
-            app.settings.fileId = document.getElementById('fileId').value.trim();
-            app.settings.fileName = document.getElementById('fileName').value.trim();
-            app.settings.autoSync = document.getElementById('autoSync').checked;
-            app.settings.notifications = document.getElementById('notifications').checked;
-
-            localStorage.setItem('teamCalendarSettings', JSON.stringify(app.settings));
-            showToast('Settings saved successfully!', 'success');
+            const dateInput = document.getElementById('currentDate').value;
+            if (dateInput) {
+                app.currentDate = new Date(dateInput + 'T12:00:00');
+                renderApp();
+                showToast('Settings saved', 'success');
+            }
             closeModal('settingsModal');
         }
 
-        function loadSettings() {
-            const saved = localStorage.getItem('teamCalendarSettings');
-            if (saved) {
-                try {
-                    app.settings = { ...app.settings, ...JSON.parse(saved) };
-                } catch (e) {
-                    console.error('Failed to load settings:', e);
-                }
-            }
-
-            // Update form
-            document.getElementById('fileId').value = app.settings.fileId;
-            document.getElementById('fileName').value = app.settings.fileName;
-            document.getElementById('autoSync').checked = app.settings.autoSync;
-            document.getElementById('notifications').checked = app.settings.notifications;
-        }
-
-        async function testConnection() {
-            const button = document.getElementById('testConnection');
-            button.innerHTML = 'Testing... <span class="spinner"></span>';
-            button.disabled = true;
-
-            try {
-                // Simulate connection test
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                
-                if (app.settings.fileId && app.settings.fileName) {
-                    showToast('OneDrive connection successful!', 'success');
-                } else {
-                    showToast('Please configure file settings first', 'error');
-                }
-            } catch (error) {
-                showToast('Connection failed: ' + error.message, 'error');
-            } finally {
-                button.innerHTML = 'Test OneDrive Connection';
-                button.disabled = false;
-            }
+        function clearData() {
+            app.teamMembers = [];
+            app.jobAssignments = {};
+            app.dataSource = 'none';
+            app.loadedFile = null;
+            
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('fileUploadArea').classList.remove('hidden');
+            
+            updateStatus('local', 'No data loaded');
+            showToast('All data cleared', 'info');
+            closeModal('settingsModal');
         }
 
         // Event Listeners
-        document.getElementById('menuButton').onclick = () => showModal('memberModal');
-        document.getElementById('prevButton').onclick = () => navigateMonth(-1);
-        document.getElementById('nextButton').onclick = () => navigateMonth(1);
-        document.getElementById('settingsButton').onclick = () => showModal('settingsModal');
-        
-        document.getElementById('closeMemberModal').onclick = () => closeModal('memberModal');
-        document.getElementById('closeSettingsModal').onclick = () => closeModal('settingsModal');
-        document.getElementById('closeJobModal').onclick = () => closeModal('jobModal');
-        
+        document.getElementById('settingsButton').onclick = openSettings;
+        document.getElementById('closeSettings').onclick = () => closeModal('settingsModal');
         document.getElementById('saveSettings').onclick = saveSettings;
-        document.getElementById('testConnection').onclick = testConnection;
+        document.getElementById('toggleDebug').onclick = toggleDebug;
+        document.getElementById('clearData').onclick = clearData;
+        document.getElementById('useSample').onclick = () => {
+            closeModal('settingsModal');
+            useSampleData();
+        };
+        document.getElementById('useSampleButton').onclick = useSampleData;
+        document.getElementById('retryButton').onclick = () => {
+            document.getElementById('errorScreen').classList.add('hidden');
+            document.getElementById('fileUploadArea').classList.remove('hidden');
+        };
+        document.getElementById('downloadTemplate').onclick = downloadTemplate;
+        document.getElementById('refreshButton').onclick = () => {
+            if (app.loadedFile) {
+                showToast('Refresh the page to reload the file', 'info');
+            } else {
+                showToast('No Excel file loaded', 'info');
+            }
+        };
 
-        // Close modals on overlay click
-        ['memberModal', 'settingsModal', 'jobModal'].forEach(modalId => {
-            document.getElementById(modalId).onclick = (e) => {
-                if (e.target.id === modalId) {
-                    closeModal(modalId);
-                }
-            };
-        });
+        // Close modal on overlay click
+        document.getElementById('settingsModal').onclick = (e) => {
+            if (e.target.id === 'settingsModal') closeModal('settingsModal');
+        };
 
         // Initialize App
-        function initializeApp() {
-            loadSettings();
-            updateMonthTitle();
-            renderTeamOverview();
-            renderMemberSelection();
+        function initApp() {
+            debugLog('Initializing Team Calendar PWA...');
+            setupFileHandlers();
             
-            // Register service worker for PWA
-            if ('serviceWorker' in navigator) {
-                const swCode = `
-                    const CACHE_NAME = 'team-calendar-v2';
-                    const urlsToCache = ['/'];
+            // Check if we have stored data
+            const storedData = localStorage.getItem('teamCalendarData');
+            if (storedData) {
+                try {
+                    const parsed = JSON.parse(storedData);
+                    app.teamMembers = parsed.teamMembers || [];
+                    app.jobAssignments = parsed.jobAssignments || {};
                     
-                    self.addEventListener('install', event => {
-                        event.waitUntil(
-                            caches.open(CACHE_NAME)
-                                .then(cache => cache.addAll(urlsToCache))
-                        );
-                        self.skipWaiting();
-                    });
-                    
-                    self.addEventListener('fetch', event => {
-                        event.respondWith(
-                            caches.match(event.request)
-                                .then(response => response || fetch(event.request))
-                        );
-                    });
-                    
-                    self.addEventListener('activate', event => {
-                        event.waitUntil(self.clients.claim());
-                    });
-                `;
-                
-                const blob = new Blob([swCode], { type: 'application/javascript' });
-                const swUrl = URL.createObjectURL(blob);
-                
-                navigator.serviceWorker.register(swUrl)
-                    .then(() => {
-                        console.log('PWA Service Worker registered');
-                        showToast('Team Calendar ready for offline use!', 'success');
-                    })
-                    .catch(err => console.log('Service Worker registration failed:', err));
+                    if (app.teamMembers.length > 0) {
+                        app.dataSource = 'stored';
+                        updateStatus('connected', 'Data restored');
+                        document.getElementById('fileUploadArea').classList.add('hidden');
+                        document.getElementById('mainApp').classList.remove('hidden');
+                        renderApp();
+                        return;
+                    }
+                } catch (e) {
+                    debugLog('Failed to restore data:', e.message);
+                }
             }
-
-            // Show welcome message
-            setTimeout(() => {
-                showToast('Welcome to Team Calendar! Tap the gear icon to configure OneDrive.', 'info');
-            }, 1500);
-        }
-
-        // Start app when DOM is ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initializeApp);
-        } else {
-            initializeApp();
-        }
-
-        // PWA Installation Prompt
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
             
-            // Could show custom install button here
-            console.log('PWA install available');
-        });
+            // Show file upload area by default
+            document.getElementById('fileUploadArea').classList.remove('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+        }
 
-        window.addEventListener('appinstalled', () => {
-            showToast('Team Calendar installed successfully!', 'success');
-            deferredPrompt = null;
-        });
+        // Save data when it changes
+        function saveDataToStorage() {
+            if (app.teamMembers.length > 0) {
+                localStorage.setItem('teamCalendarData', JSON.stringify({
+                    teamMembers: app.teamMembers,
+                    jobAssignments: app.jobAssignments
+                }));
+            }
+        }
+
+        // Auto-save when data is loaded
+        const originalRenderApp = renderApp;
+        renderApp = function() {
+            originalRenderApp();
+            saveDataToStorage();
+        };
+
+        // Start app
+        document.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
 </html>
