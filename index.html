@@ -732,138 +732,260 @@
             <div style="width: 40px;"></div>
         </div>
         <div class="key-detail-screen">
-            <!-- Profile Settings -->
+            <!-- Technician Identification -->
             <div class="detail-card">
-                <h3 class="section-title">Profile Information</h3>
+                <h3 class="section-title">Technician Identification</h3>
                 <div class="form-group">
-                    <label class="form-label">Technician Name</label>
+                    <label class="form-label">Full Name *</label>
                     <input type="text" class="form-input" id="techName" value="John Doe" placeholder="Enter your full name">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Technician ID</label>
+                    <label class="form-label">Technician ID *</label>
                     <input type="text" class="form-input" id="techId" value="T001" placeholder="Enter technician ID">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Department</label>
                     <select class="form-select" id="department">
                         <option value="maintenance">Maintenance</option>
-                        <option value="it">IT Services</option>
                         <option value="facilities">Facilities</option>
+                        <option value="it">IT Support</option>
                         <option value="security">Security</option>
+                        <option value="operations">Operations</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Phone Number</label>
-                    <input type="tel" class="form-input" id="phone" value="(555) 123-4567" placeholder="Enter phone number">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Email Address</label>
-                    <input type="email" class="form-input" id="email" value="john.doe@company.com" placeholder="Enter email address">
+                    <label class="form-label">Contact Phone</label>
+                    <input type="tel" class="form-input" id="phone" value="(555) 123-4567" placeholder="Phone number">
                 </div>
             </div>
 
-            <!-- Database Configuration -->
+            <!-- Database Location -->
             <div class="detail-card">
-                <h3 class="section-title">Database Configuration</h3>
+                <h3 class="section-title">Database Location</h3>
                 <div class="form-group">
-                    <label class="form-label">Database Type</label>
-                    <select class="form-select" id="dbType" onchange="toggleDbConfig()">
-                        <option value="sql">SQL Server</option>
-                        <option value="mysql">MySQL</option>
-                        <option value="postgresql">PostgreSQL</option>
-                        <option value="sqlite">SQLite</option>
+                    <label class="form-label">Database Type *</label>
+                    <select class="form-select" id="dbLocation" onchange="showDbConfig()">
+                        <option value="">Select Database Location</option>
+                        <option value="mongodb">MongoDB Database</option>
+                        <option value="sharepoint">SharePoint Site</option>
+                        <option value="onedrive">OneDrive Directory</option>
+                        <option value="local">Local Network Server</option>
                         <option value="cloud">Cloud Database</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Server Address</label>
-                    <input type="text" class="form-input" id="serverAddr" value="keymanager.company.com" placeholder="Enter server address or IP">
+
+                <!-- MongoDB Configuration -->
+                <div id="mongodbConfig" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label">MongoDB Connection Type</label>
+                        <select class="form-select" id="mongoType" onchange="toggleMongoConfig()">
+                            <option value="atlas">MongoDB Atlas (Cloud)</option>
+                            <option value="local">Local MongoDB Server</option>
+                            <option value="replica">Replica Set</option>
+                            <option value="custom">Custom Connection String</option>
+                        </select>
+                    </div>
+                    
+                    <div id="atlasConfig">
+                        <div class="form-group">
+                            <label class="form-label">Atlas Cluster URL *</label>
+                            <input type="text" class="form-input" id="atlasUrl" placeholder="cluster0.xxxxx.mongodb.net">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Username *</label>
+                            <input type="text" class="form-input" id="mongoUsername" placeholder="Database username">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Password *</label>
+                            <input type="password" class="form-input" id="mongoPassword" placeholder="Database password">
+                        </div>
+                    </div>
+                    
+                    <div id="localMongoConfig" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label">Server Address *</label>
+                            <input type="text" class="form-input" id="mongoHost" value="localhost" placeholder="localhost or IP address">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Port</label>
+                            <input type="number" class="form-input" id="mongoPort" value="27017" placeholder="27017">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Authentication Required</label>
+                            <select class="form-select" id="mongoAuth" onchange="toggleMongoAuth()">
+                                <option value="no">No Authentication</option>
+                                <option value="yes">Username/Password</option>
+                            </select>
+                        </div>
+                        <div id="mongoAuthFields" style="display: none;">
+                            <div class="form-group">
+                                <label class="form-label">Username</label>
+                                <input type="text" class="form-input" id="localMongoUser" placeholder="Database username">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Password</label>
+                                <input type="password" class="form-input" id="localMongoPass" placeholder="Database password">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="customMongoConfig" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label">MongoDB Connection String *</label>
+                            <textarea class="form-input form-textarea" id="mongoConnectionString" placeholder="mongodb://username:password@host:port/database&#10;or&#10;mongodb+srv://username:password@cluster.mongodb.net/database"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Database Name *</label>
+                        <input type="text" class="form-input" id="mongoDbName" value="KeyManagementDB" placeholder="Database name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Collections Configuration</label>
+                        <div style="margin-top: 8px;">
+                            <div style="margin-bottom: 8px;">
+                                <label class="form-label" style="margin-bottom: 4px; font-size: 14px;">Keys Collection:</label>
+                                <input type="text" class="form-input" id="keysCollection" value="keys" placeholder="keys" style="padding: 8px 12px; font-size: 14px;">
+                            </div>
+                            <div style="margin-bottom: 8px;">
+                                <label class="form-label" style="margin-bottom: 4px; font-size: 14px;">Technicians Collection:</label>
+                                <input type="text" class="form-input" id="techniciansCollection" value="technicians" placeholder="technicians" style="padding: 8px 12px; font-size: 14px;">
+                            </div>
+                            <div style="margin-bottom: 8px;">
+                                <label class="form-label" style="margin-bottom: 4px; font-size: 14px;">Audit Collection:</label>
+                                <input type="text" class="form-input" id="auditCollection" value="audit_log" placeholder="audit_log" style="padding: 8px 12px; font-size: 14px;">
+                            </div>
+                            <div>
+                                <label class="form-label" style="margin-bottom: 4px; font-size: 14px;">Transfers Collection:</label>
+                                <input type="text" class="form-input" id="transfersCollection" value="transfers" placeholder="transfers" style="padding: 8px 12px; font-size: 14px;">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Advanced Options</label>
+                        <div style="margin-top: 8px;">
+                            <label style="display: flex; align-items: center; margin-bottom: 8px;">
+                                <input type="checkbox" id="mongoSSL" style="margin-right: 8px;">
+                                Use SSL/TLS Connection
+                            </label>
+                            <label style="display: flex; align-items: center; margin-bottom: 8px;">
+                                <input type="checkbox" id="mongoRetryWrites" checked style="margin-right: 8px;">
+                                Retry Writes
+                            </label>
+                            <label style="display: flex; align-items: center;">
+                                <input type="checkbox" id="mongoCompression" style="margin-right: 8px;">
+                                Enable Compression
+                            </label>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Database Name</label>
-                    <input type="text" class="form-input" id="dbName" value="KeyManagementDB" placeholder="Enter database name">
+
+                <!-- SharePoint Configuration -->
+                <div id="sharepointDbConfig" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label">SharePoint Site URL *</label>
+                        <input type="url" class="form-input" id="sharePointSiteUrl" placeholder="https://company.sharepoint.com/sites/keymanagement">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">List/Library Name *</label>
+                        <input type="text" class="form-input" id="sharePointList" value="KeyManagementDB" placeholder="SharePoint list or library name">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">SharePoint Username</label>
+                        <input type="email" class="form-input" id="sharePointUser" placeholder="user@company.com">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Port</label>
-                    <input type="number" class="form-input" id="dbPort" value="1433" placeholder="Enter port number">
+
+                <!-- OneDrive Configuration -->
+                <div id="onedriveDbConfig" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label">OneDrive Account *</label>
+                        <input type="email" class="form-input" id="oneDriveUser" placeholder="user@company.onmicrosoft.com">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Database Folder Path *</label>
+                        <input type="text" class="form-input" id="oneDrivePath" value="/KeyManagementDB" placeholder="/KeyManagementDB">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Database File Name</label>
+                        <input type="text" class="form-input" id="oneDriveDbFile" value="keys.db" placeholder="keys.db">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Connection String (Advanced)</label>
-                    <textarea class="form-input form-textarea" id="connectionString" placeholder="Custom connection string (optional)"></textarea>
+
+                <!-- Local Network Configuration -->
+                <div id="localDbConfig" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label">Server Address *</label>
+                        <input type="text" class="form-input" id="localServer" placeholder="192.168.1.100 or server.company.com">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Database Name *</label>
+                        <input type="text" class="form-input" id="localDbName" value="KeyManagementDB" placeholder="Database name">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Port</label>
+                        <input type="number" class="form-input" id="localPort" value="1433" placeholder="1433">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Username</label>
+                        <input type="text" class="form-input" id="localUser" placeholder="Database username">
+                    </div>
                 </div>
-                <button class="btn-full btn-secondary" style="margin-bottom: 12px;" onclick="testConnection()">Test Connection</button>
+
+                <!-- Cloud Database Configuration -->
+                <div id="cloudDbConfig" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label">Cloud Provider</label>
+                        <select class="form-select" id="cloudProvider">
+                            <option value="azure">Microsoft Azure SQL</option>
+                            <option value="aws">Amazon RDS</option>
+                            <option value="google">Google Cloud SQL</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Connection String *</label>
+                        <textarea class="form-input form-textarea" id="cloudConnectionString" placeholder="Server=tcp:server.database.windows.net,1433;Database=KeyManagementDB;..."></textarea>
+                    </div>
+                </div>
+
+                <button class="btn-full btn-secondary" style="margin-top: 15px;" onclick="testDatabaseConnection()">
+                    <span id="testBtnText">Test Database Connection</span>
+                </button>
+                
+                <div id="connectionStatus" style="margin-top: 10px; padding: 12px; border-radius: 8px; display: none; text-align: center; font-weight: 500;">
+                    <!-- Status will be shown here -->
+                </div>
             </div>
 
-            <!-- Cloud Storage Integration -->
+            <!-- Sync Settings -->
             <div class="detail-card">
-                <h3 class="section-title">Cloud Storage Integration</h3>
+                <h3 class="section-title">Synchronization Settings</h3>
                 <div class="form-group">
-                    <label class="form-label">Primary Cloud Service</label>
-                    <select class="form-select" id="cloudService" onchange="toggleCloudConfig()">
-                        <option value="none">None</option>
-                        <option value="sharepoint">SharePoint</option>
-                        <option value="onedrive">OneDrive</option>
-                        <option value="googledrive">Google Drive</option>
-                        <option value="dropbox">Dropbox</option>
+                    <label class="form-label">Auto-Sync Frequency</label>
+                    <select class="form-select" id="syncFrequency">
+                        <option value="realtime">Real-time</option>
+                        <option value="5min">Every 5 minutes</option>
+                        <option value="15min">Every 15 minutes</option>
+                        <option value="30min">Every 30 minutes</option>
+                        <option value="1hour">Every hour</option>
+                        <option value="manual">Manual only</option>
                     </select>
                 </div>
-                
-                <div id="sharepointConfig" style="display: none;">
-                    <div class="form-group">
-                        <label class="form-label">SharePoint Site URL</label>
-                        <input type="url" class="form-input" id="sharePointUrl" placeholder="https://company.sharepoint.com/sites/keymanagement">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Document Library</label>
-                        <input type="text" class="form-input" id="sharePointLibrary" value="KeyDocuments" placeholder="Document library name">
-                    </div>
-                </div>
-
-                <div id="onedriveConfig" style="display: none;">
-                    <div class="form-group">
-                        <label class="form-label">OneDrive Business Account</label>
-                        <input type="email" class="form-input" id="oneDriveAccount" placeholder="user@company.onmicrosoft.com">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Sync Folder Path</label>
-                        <input type="text" class="form-input" id="oneDrivePath" value="/KeyManagement" placeholder="Folder path in OneDrive">
-                    </div>
-                </div>
-
                 <div class="form-group">
-                    <label class="form-label">Auto-Sync Documents</label>
-                    <select class="form-select" id="autoSync">
-                        <option value="enabled">Enabled</option>
-                        <option value="disabled">Disabled</option>
-                        <option value="wifi-only">WiFi Only</option>
+                    <label class="form-label">Offline Mode</label>
+                    <select class="form-select" id="offlineMode">
+                        <option value="enabled">Enabled (Cache data locally)</option>
+                        <option value="disabled">Disabled (Online only)</option>
                     </select>
                 </div>
-
                 <div class="form-group">
-                    <label class="form-label">Document Types to Sync</label>
-                    <div style="margin-top: 8px;">
-                        <label style="display: flex; align-items: center; margin-bottom: 8px;">
-                            <input type="checkbox" id="syncReports" checked style="margin-right: 8px;">
-                            Audit Reports
-                        </label>
-                        <label style="display: flex; align-items: center; margin-bottom: 8px;">
-                            <input type="checkbox" id="syncImages" checked style="margin-right: 8px;">
-                            Key Images/Photos
-                        </label>
-                        <label style="display: flex; align-items: center; margin-bottom: 8px;">
-                            <input type="checkbox" id="syncTransfers" style="margin-right: 8px;">
-                            Transfer Documents
-                        </label>
-                        <label style="display: flex; align-items: center;">
-                            <input type="checkbox" id="syncMaintenance" style="margin-right: 8px;">
-                            Maintenance Logs
-                        </label>
-                    </div>
-                </div>
-
-                <button class="btn-full btn-primary" style="margin-bottom: 12px;" onclick="connectCloudService()">Connect to Cloud Service</button>
-                <div id="cloudStatus" style="text-align: center; padding: 10px; background: #d4edda; color: #155724; border-radius: 8px; font-size: 14px; display: none;">
-                    ✅ Connected to SharePoint
+                    <label class="form-label">Sync on WiFi Only</label>
+                    <select class="form-select" id="wifiOnly">
+                        <option value="no">No (Use mobile data)</option>
+                        <option value="yes">Yes (WiFi only)</option>
+                    </select>
                 </div>
             </div>
 
@@ -871,23 +993,7 @@
             <div class="detail-card">
                 <h3 class="section-title">App Preferences</h3>
                 <div class="form-group">
-                    <label class="form-label">Theme</label>
-                    <select class="form-select" id="theme">
-                        <option value="light">Light</option>
-                        <option value="dark">Dark</option>
-                        <option value="auto">Auto (System)</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Notifications</label>
-                    <select class="form-select" id="notifications">
-                        <option value="all">All Notifications</option>
-                        <option value="important">Important Only</option>
-                        <option value="none">None</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Default View</label>
+                    <label class="form-label">Default Screen</label>
                     <select class="form-select" id="defaultView">
                         <option value="dashboard">Dashboard</option>
                         <option value="keys">My Keys</option>
@@ -895,19 +1001,29 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Offline Mode</label>
-                    <select class="form-select" id="offlineMode">
-                        <option value="enabled">Enabled</option>
-                        <option value="disabled">Disabled</option>
+                    <label class="form-label">Notifications</label>
+                    <select class="form-select" id="notifications">
+                        <option value="all">All notifications</option>
+                        <option value="important">Important only</option>
+                        <option value="none">None</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">App Theme</label>
+                    <select class="form-select" id="appTheme">
+                        <option value="light">Light</option>
+                        <option value="dark">Dark</option>
+                        <option value="auto">Auto (system)</option>
                     </select>
                 </div>
             </div>
 
             <!-- Action Buttons -->
             <div class="detail-card">
-                <button class="btn-full btn-primary" style="margin-bottom: 12px;" onclick="saveSettings()">Save Settings</button>
-                <button class="btn-full btn-secondary" style="margin-bottom: 12px;" onclick="exportSettings()">Export Configuration</button>
-                <button class="btn-full" style="background: #dc3545; color: white;" onclick="resetSettings()">Reset to Defaults</button>
+                <button class="btn-full btn-primary" style="margin-bottom: 12px;" onclick="saveAllSettings()">Save Settings</button>
+                <button class="btn-full btn-secondary" style="margin-bottom: 12px;" onclick="exportConfiguration()">Export Configuration</button>
+                <button class="btn-full" style="background: #dc3545; color: white; margin-bottom: 12px;" onclick="resetToDefaults()">Reset to Defaults</button>
+                <button class="btn-full btn-secondary" onclick="syncNow()">Sync Now</button>
             </div>
         </div>
     </div>
@@ -971,7 +1087,6 @@
 
     function showTransferScreen(keyId) {
         showScreen('transfer');
-        // Pre-select the key in the transfer form
         if (keyId) {
             const select = document.querySelector('.transfer-screen select');
             Array.from(select.options).forEach(option => {
@@ -993,7 +1108,6 @@
         
         if (statusMap[newStatus]) {
             alert(`${keyId} status updated to: ${statusMap[newStatus]}`);
-            // In a real app, this would make an API call to update the database
         }
     }
 
@@ -1027,110 +1141,112 @@
     }
 
     // Settings Functions
-    function toggleDbConfig() {
-        const dbType = document.getElementById('dbType').value;
-        const serverAddr = document.getElementById('serverAddr');
-        const dbPort = document.getElementById('dbPort');
+    function showDbConfig() {
+        const dbLocation = document.getElementById('dbLocation').value;
         
-        // Update default ports based on database type
-        switch(dbType) {
-            case 'mysql':
-                dbPort.value = '3306';
-                break;
-            case 'postgresql':
-                dbPort.value = '5432';
-                break;
-            case 'sql':
-                dbPort.value = '1433';
-                break;
-            case 'sqlite':
-                serverAddr.disabled = true;
-                dbPort.disabled = true;
-                break;
-            case 'cloud':
-                dbPort.value = '443';
-                break;
-            default:
-                serverAddr.disabled = false;
-                dbPort.disabled = false;
-        }
-    }
-
-    function toggleCloudConfig() {
-        const cloudService = document.getElementById('cloudService').value;
-        
-        // Hide all cloud config sections
-        document.getElementById('sharepointConfig').style.display = 'none';
-        document.getElementById('onedriveConfig').style.display = 'none';
+        // Hide all config sections
+        document.getElementById('mongodbConfig').style.display = 'none';
+        document.getElementById('sharepointDbConfig').style.display = 'none';
+        document.getElementById('onedriveDbConfig').style.display = 'none';
+        document.getElementById('localDbConfig').style.display = 'none';
+        document.getElementById('cloudDbConfig').style.display = 'none';
         
         // Show relevant config section
-        switch(cloudService) {
+        switch(dbLocation) {
+            case 'mongodb':
+                document.getElementById('mongodbConfig').style.display = 'block';
+                toggleMongoConfig();
+                break;
             case 'sharepoint':
-                document.getElementById('sharepointConfig').style.display = 'block';
+                document.getElementById('sharepointDbConfig').style.display = 'block';
                 break;
             case 'onedrive':
-                document.getElementById('onedriveConfig').style.display = 'block';
+                document.getElementById('onedriveDbConfig').style.display = 'block';
+                break;
+            case 'local':
+                document.getElementById('localDbConfig').style.display = 'block';
+                break;
+            case 'cloud':
+                document.getElementById('cloudDbConfig').style.display = 'block';
                 break;
         }
     }
 
-    function testConnection() {
-        const serverAddr = document.getElementById('serverAddr').value;
-        const dbName = document.getElementById('dbName').value;
-        const dbPort = document.getElementById('dbPort').value;
+    function toggleMongoConfig() {
+        const mongoType = document.getElementById('mongoType').value;
         
-        if (!serverAddr || !dbName) {
-            alert('Please enter server address and database name');
+        // Hide all MongoDB config sections
+        document.getElementById('atlasConfig').style.display = 'none';
+        document.getElementById('localMongoConfig').style.display = 'none';
+        document.getElementById('customMongoConfig').style.display = 'none';
+        
+        // Show relevant MongoDB config
+        switch(mongoType) {
+            case 'atlas':
+                document.getElementById('atlasConfig').style.display = 'block';
+                break;
+            case 'local':
+            case 'replica':
+                document.getElementById('localMongoConfig').style.display = 'block';
+                break;
+            case 'custom':
+                document.getElementById('customMongoConfig').style.display = 'block';
+                break;
+        }
+    }
+
+    function toggleMongoAuth() {
+        const authRequired = document.getElementById('mongoAuth').value === 'yes';
+        document.getElementById('mongoAuthFields').style.display = authRequired ? 'block' : 'none';
+    }
+
+    function testDatabaseConnection() {
+        const dbLocation = document.getElementById('dbLocation').value;
+        const statusDiv = document.getElementById('connectionStatus');
+        const testBtn = document.getElementById('testBtnText');
+        
+        if (!dbLocation) {
+            alert('Please select a database location first');
             return;
         }
+        
+        // Show testing status
+        testBtn.textContent = 'Testing Connection...';
+        statusDiv.style.display = 'block';
+        statusDiv.style.background = '#fff3cd';
+        statusDiv.style.color = '#856404';
+        statusDiv.textContent = '🔄 Testing database connection...';
         
         // Simulate connection test
-        const connectionBtn = document.querySelector('button[onclick="testConnection()"]');
-        connectionBtn.textContent = 'Testing Connection...';
-        connectionBtn.disabled = true;
-        
         setTimeout(() => {
-            connectionBtn.textContent = 'Test Connection';
-            connectionBtn.disabled = false;
-            alert('✅ Database connection successful!\n\nServer: ' + serverAddr + '\nDatabase: ' + dbName + '\nPort: ' + dbPort);
-        }, 2000);
+            testBtn.textContent = 'Test Database Connection';
+            
+            const success = Math.random() > 0.2; // 80% success rate for demo
+            
+            if (success) {
+                statusDiv.style.background = '#d4edda';
+                statusDiv.style.color = '#155724';
+                statusDiv.innerHTML = '✅ Database connection successful!<br><small>All systems ready</small>';
+            } else {
+                statusDiv.style.background = '#f8d7da';
+                statusDiv.style.color = '#721c24';
+                statusDiv.innerHTML = '❌ Connection failed<br><small>Please check your settings</small>';
+            }
+        }, 3000);
     }
 
-    function connectCloudService() {
-        const cloudService = document.getElementById('cloudService').value;
+    function saveAllSettings() {
+        const techName = document.getElementById('techName').value;
+        const techId = document.getElementById('techId').value;
+        const dbLocation = document.getElementById('dbLocation').value;
         
-        if (cloudService === 'none') {
-            alert('Please select a cloud service first');
+        if (!techName || !techId) {
+            alert('Please fill in your name and technician ID');
             return;
         }
         
-        const connectBtn = document.querySelector('button[onclick="connectCloudService()"]');
-        connectBtn.textContent = 'Connecting...';
-        connectBtn.disabled = true;
-        
-        setTimeout(() => {
-            connectBtn.textContent = 'Connect to Cloud Service';
-            connectBtn.disabled = false;
-            
-            const statusDiv = document.getElementById('cloudStatus');
-            statusDiv.style.display = 'block';
-            
-            let serviceName = cloudService.charAt(0).toUpperCase() + cloudService.slice(1);
-            if (cloudService === 'onedrive') serviceName = 'OneDrive';
-            if (cloudService === 'googledrive') serviceName = 'Google Drive';
-            
-            statusDiv.innerHTML = '✅ Connected to ' + serviceName;
-            
-            alert('Successfully connected to ' + serviceName + '!\n\nAuto-sync is now enabled for selected document types.');
-        }, 2000);
-    }
-
-    function saveSettings() {
-        const techName = document.getElementById('techName').value;
-        const techId = document.getElementById('techId').value;
-        
-        if (!techName || !techId) {
-            alert('Please fill in required fields: Technician Name and ID');
+        if (!dbLocation) {
+            alert('Please select a database location');
             return;
         }
         
@@ -1139,99 +1255,69 @@
         const initials = techName.split(' ').map(n => n[0]).join('').toUpperCase();
         profileIcon.textContent = initials;
         
-        // Simulate saving settings
-        const saveBtn = document.querySelector('button[onclick="saveSettings()"]');
-        saveBtn.textContent = 'Saving...';
-        saveBtn.disabled = true;
-        
-        setTimeout(() => {
-            saveBtn.textContent = 'Save Settings';
-            saveBtn.disabled = false;
-            alert('✅ Settings saved successfully!\n\nAll configuration changes have been applied.');
-        }, 1500);
+        alert('✅ Settings saved successfully!\n\nAll configuration changes have been applied.');
     }
 
-    function exportSettings() {
-        const settings = {
-            profile: {
+    function exportConfiguration() {
+        const config = {
+            technician: {
                 name: document.getElementById('techName').value,
                 id: document.getElementById('techId').value,
                 department: document.getElementById('department').value,
-                phone: document.getElementById('phone').value,
-                email: document.getElementById('email').value
+                phone: document.getElementById('phone').value
             },
             database: {
-                type: document.getElementById('dbType').value,
-                server: document.getElementById('serverAddr').value,
-                database: document.getElementById('dbName').value,
-                port: document.getElementById('dbPort').value
+                type: document.getElementById('dbLocation').value
             },
-            cloud: {
-                service: document.getElementById('cloudService').value,
-                autoSync: document.getElementById('autoSync').value
-            },
-            app: {
-                theme: document.getElementById('theme').value,
-                notifications: document.getElementById('notifications').value,
-                defaultView: document.getElementById('defaultView').value,
-                offlineMode: document.getElementById('offlineMode').value
-            }
+            exportDate: new Date().toISOString()
         };
         
-        const configString = JSON.stringify(settings, null, 2);
+        const configString = JSON.stringify(config, null, 2);
         const blob = new Blob([configString], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'keytech_config_' + new Date().toISOString().split('T')[0] + '.json';
+        a.download = `keytech_config_${config.technician.id}_${new Date().toISOString().split('T')[0]}.json`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
         
-        alert('Configuration exported successfully!\nFile saved as: keytech_config_' + new Date().toISOString().split('T')[0] + '.json');
+        alert('✅ Configuration exported successfully!');
     }
 
-    function resetSettings() {
-        if (confirm('Are you sure you want to reset all settings to defaults?\n\nThis action cannot be undone.')) {
-            // Reset form values to defaults
+    function resetToDefaults() {
+        if (confirm('⚠️ Reset all settings to defaults?\n\nThis cannot be undone.')) {
+            // Reset all form values
             document.getElementById('techName').value = 'John Doe';
             document.getElementById('techId').value = 'T001';
             document.getElementById('department').value = 'maintenance';
             document.getElementById('phone').value = '(555) 123-4567';
-            document.getElementById('email').value = 'john.doe@company.com';
+            document.getElementById('dbLocation').value = '';
             
-            document.getElementById('dbType').value = 'sql';
-            document.getElementById('serverAddr').value = 'keymanager.company.com';
-            document.getElementById('dbName').value = 'KeyManagementDB';
-            document.getElementById('dbPort').value = '1433';
-            document.getElementById('connectionString').value = '';
-            
-            document.getElementById('cloudService').value = 'none';
-            document.getElementById('autoSync').value = 'enabled';
-            
-            document.getElementById('theme').value = 'light';
-            document.getElementById('notifications').value = 'all';
-            document.getElementById('defaultView').value = 'dashboard';
-            document.getElementById('offlineMode').value = 'enabled';
-            
-            // Hide cloud config sections
-            document.getElementById('sharepointConfig').style.display = 'none';
-            document.getElementById('onedriveConfig').style.display = 'none';
-            document.getElementById('cloudStatus').style.display = 'none';
+            // Hide all config sections
+            showDbConfig();
+            document.getElementById('connectionStatus').style.display = 'none';
             
             alert('✅ Settings reset to defaults successfully!');
         }
     }
 
+    function syncNow() {
+        const dbLocation = document.getElementById('dbLocation').value;
+        
+        if (!dbLocation) {
+            alert('Please configure your database location first');
+            return;
+        }
+        
+        alert('✅ Sync completed successfully!\n\n• Keys updated: 12\n• New transfers: 2\n• Audit entries: 5\n\nLast sync: ' + new Date().toLocaleTimeString());
+    }
+
     // Initialize app
     document.addEventListener('DOMContentLoaded', function() {
         showScreen('dashboard');
-        
-        // Initialize settings toggles
-        toggleDbConfig();
-        toggleCloudConfig();
     });
 </script>
 ```
