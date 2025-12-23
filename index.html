@@ -3,1322 +3,911 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KeyTech Mobile</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Team Calendar</title>
+    <meta name="description" content="Team resource calendar with real Excel integration">
+    <meta name="theme-color" content="#3b82f6">
 
 ```
+<!-- PWA Configuration -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Team Calendar">
+
+<!-- PWA Manifest -->
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiVGVhbSBDYWxlbmRhciIsInNob3J0X25hbWUiOiJUZWFtQ2FsIiwiZGVzY3JpcHRpb24iOiJUZWFtIHJlc291cmNlIGNhbGVuZGFyIHdpdGggcmVhbCBFeGNlbCBpbnRlZ3JhdGlvbiIsInN0YXJ0X3VybCI6Ii8iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjZmZmZmZmIiwidGhlbWVfY29sb3IiOiIjM2I4MmY2In0=">
+
+<!-- Excel Processing Library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<style>
+    :root {
+        --primary: #3b82f6;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --error: #ef4444;
+        --gray-50: #f9fafb;
+        --gray-100: #f3f4f6;
+        --gray-200: #e5e7eb;
+        --gray-500: #6b7280;
+        --gray-700: #374151;
+        --gray-900: #111827;
+        --white: #ffffff;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
     body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        background: #f5f5f7;
-        color: #1d1d1f;
-        overflow-x: hidden;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+        background: var(--gray-50);
+        color: var(--gray-900);
+        -webkit-font-smoothing: antialiased;
     }
 
-    .phone-container {
-        max-width: 375px;
-        margin: 20px auto;
-        background: white;
-        border-radius: 20px;
-        box-shadow: 0 8px 30px rgba(0,0,0,0.2);
-        overflow: hidden;
-        position: relative;
-    }
-
-    .status-bar {
-        background: #000;
-        color: white;
-        padding: 8px 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-size: 14px;
-        font-weight: 600;
+    .container {
+        max-width: 428px;
+        margin: 0 auto;
+        min-height: 100vh;
+        background: var(--white);
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
     }
 
     .header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 20px;
+        background: var(--white);
+        padding: 16px;
+        border-bottom: 1px solid var(--gray-200);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+
+    .header-row {
         display: flex;
         align-items: center;
         justify-content: space-between;
     }
 
-    .header h1 {
-        font-size: 24px;
-        font-weight: 700;
+    .btn {
+        background: none;
+        border: none;
+        padding: 8px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.2s;
     }
 
-    .profile-icon {
-        width: 40px;
-        height: 40px;
+    .btn:hover {
+        background: var(--gray-100);
+    }
+
+    .month-nav {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .month-title {
+        font-size: 18px;
+        font-weight: 600;
+        min-width: 150px;
+        text-align: center;
+    }
+
+    .status-bar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 8px;
+        font-size: 12px;
+        border-top: 1px solid var(--gray-200);
+    }
+
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+    }
+
+    .status-excel { background: var(--success); }
+    .status-sample { background: var(--warning); }
+    .status-error { background: var(--error); }
+
+    .content {
+        padding: 16px;
+    }
+
+    .jobs-card {
+        background: var(--white);
+        border: 1px solid var(--gray-200);
+        border-radius: 12px;
+        margin-bottom: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: var(--white);
+        border-radius: 12px 12px 0 0;
+    }
+
+    .card-title {
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .badge {
         background: rgba(255,255,255,0.2);
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .jobs-list {
+        padding: 12px 16px 16px;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .job {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        border: 1px solid var(--gray-200);
+        border-radius: 8px;
+        margin-bottom: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+        background: var(--white);
+    }
+
+    .job:hover {
+        background: var(--gray-50);
+        transform: translateY(-1px);
+    }
+
+    .job.on-call {
+        border-color: #fca5a5;
+        background: #fef2f2;
+    }
+
+    .avatar {
+        width: 32px;
+        height: 32px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-weight: bold;
-    }
-
-    .screen {
-        display: none;
-        min-height: 600px;
-        padding-bottom: 80px;
-    }
-
-    .screen.active {
-        display: block;
-    }
-
-    .dashboard {
-        padding: 20px;
-    }
-
-    .stats-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 15px;
-        margin-bottom: 25px;
-    }
-
-    .stat-card {
-        background: white;
-        padding: 20px;
-        border-radius: 16px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        text-align: center;
-    }
-
-    .stat-number {
-        font-size: 28px;
-        font-weight: bold;
-        color: #667eea;
-        margin-bottom: 5px;
-    }
-
-    .stat-label {
+        color: var(--white);
         font-size: 12px;
-        color: #8e8e93;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+        font-weight: 700;
     }
 
-    .quick-actions {
-        background: white;
-        border-radius: 16px;
-        padding: 20px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-
-    .section-title {
-        font-size: 18px;
-        font-weight: 600;
-        margin-bottom: 15px;
-    }
-
-    .action-btn {
-        display: flex;
-        align-items: center;
-        padding: 15px;
-        background: #f8f9fa;
-        border-radius: 12px;
-        margin-bottom: 10px;
-        border: none;
-        width: 100%;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-    .action-btn:hover {
-        background: #e9ecef;
-        transform: translateY(-2px);
-    }
-
-    .action-icon {
-        width: 24px;
-        height: 24px;
-        background: #667eea;
-        border-radius: 6px;
-        margin-right: 15px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 14px;
-    }
-
-    .key-list {
-        padding: 20px;
-    }
-
-    .search-bar {
-        background: white;
-        border-radius: 12px;
-        padding: 12px 20px;
-        margin-bottom: 20px;
-        border: 1px solid #e5e5ea;
-        font-size: 16px;
-        width: 100%;
-    }
-
-    .key-item {
-        background: white;
-        border-radius: 12px;
-        padding: 16px;
-        margin-bottom: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        border-left: 4px solid #667eea;
-    }
-
-    .key-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 8px;
-    }
-
-    .key-id {
-        font-weight: 600;
-        font-size: 16px;
-    }
-
-    .key-status {
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 500;
-    }
-
-    .status-active {
-        background: #d4edda;
-        color: #155724;
-    }
-
-    .status-maintenance {
-        background: #fff3cd;
-        color: #856404;
-    }
-
-    .key-details {
-        font-size: 14px;
-        color: #6c757d;
-    }
-
-    .key-actions {
-        display: flex;
-        gap: 10px;
-        margin-top: 12px;
-    }
-
-    .btn-small {
-        padding: 8px 16px;
-        border-radius: 8px;
-        border: none;
-        font-size: 12px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-
-    .btn-primary {
-        background: #667eea;
-        color: white;
-    }
-
-    .btn-secondary {
-        background: #f8f9fa;
-        color: #495057;
-        border: 1px solid #dee2e6;
-    }
-
-    .key-detail-screen {
-        padding: 20px;
-    }
-
-    .detail-card {
-        background: white;
-        border-radius: 16px;
-        padding: 20px;
-        margin-bottom: 20px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-
-    .detail-row {
-        display: flex;
-        justify-content: space-between;
-        padding: 12px 0;
-        border-bottom: 1px solid #f1f3f4;
-    }
-
-    .detail-row:last-child {
-        border-bottom: none;
-    }
-
-    .detail-label {
-        font-weight: 500;
-        color: #6c757d;
-    }
-
-    .detail-value {
-        font-weight: 600;
-        text-align: right;
-    }
-
-    .transfer-screen {
-        padding: 20px;
-    }
-
-    .form-group {
-        margin-bottom: 20px;
-    }
-
-    .form-label {
-        display: block;
-        margin-bottom: 8px;
-        font-weight: 500;
-    }
-
-    .form-input, .form-select {
-        width: 100%;
-        padding: 12px 16px;
-        border: 1px solid #e5e5ea;
-        border-radius: 12px;
-        font-size: 16px;
-        background: white;
-    }
-
-    .form-textarea {
-        min-height: 100px;
-        resize: vertical;
-    }
-
-    .btn-full {
-        width: 100%;
-        padding: 16px;
-        border-radius: 12px;
-        border: none;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-    .btn-transfer {
-        background: #28a745;
-        color: white;
-    }
-
-    .btn-transfer:hover {
-        background: #218838;
-    }
-
-    .audit-screen {
-        padding: 20px;
-    }
-
-    .audit-item {
-        background: white;
-        border-radius: 12px;
-        padding: 16px;
-        margin-bottom: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-
-    .audit-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 8px;
-    }
-
-    .audit-action {
-        font-weight: 600;
-        color: #667eea;
-    }
-
-    .audit-date {
-        font-size: 12px;
-        color: #8e8e93;
-    }
-
-    .audit-details {
-        font-size: 14px;
-        color: #6c757d;
-    }
-
-    .bottom-nav {
-        position: fixed;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 375px;
-        background: white;
-        border-top: 1px solid #e5e5ea;
-        display: flex;
-        justify-content: space-around;
-        padding: 10px 0;
-    }
-
-    .nav-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 6px 12px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        border: none;
-        background: none;
-        color: #8e8e93;
+    .job-info {
         flex: 1;
     }
 
-    .nav-item.active {
-        color: #667eea;
+    .job-title {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 2px;
     }
 
-    .nav-icon {
-        width: 20px;
-        height: 20px;
-        margin-bottom: 3px;
+    .job-meta {
+        font-size: 12px;
+        color: var(--gray-500);
+    }
+
+    .job-badges {
+        display: flex;
+        gap: 4px;
+        margin-bottom: 4px;
+    }
+
+    .type-badge {
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 600;
+    }
+
+    .priority-badge {
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 600;
+    }
+
+    .priority-high { background: #fef2f2; color: #dc2626; }
+    .priority-medium { background: #fef3c7; color: #d97706; }
+    .priority-low { background: #ecfdf5; color: #059669; }
+
+    .job-design { background: #dbeafe; color: #1e40af; }
+    .job-development { background: #dcfce7; color: #166534; }
+    .job-testing { background: #fef3c7; color: #92400e; }
+    .job-meeting { background: #e9d5ff; color: #7c3aed; }
+    .job-review { background: #fed7aa; color: #c2410c; }
+    .job-planning { background: #fce7f3; color: #be185d; }
+    .job-on-call { background: #fee2e2; color: #dc2626; }
+
+    .member-blue { background: #3b82f6; }
+    .member-green { background: #10b981; }
+    .member-purple { background: #8b5cf6; }
+    .member-yellow { background: #f59e0b; }
+    .member-pink { background: #ec4899; }
+    .member-orange { background: #f97316; }
+
+    .modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 1000;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 16px;
+        padding: 16px;
     }
 
-    .nav-label {
-        font-size: 9px;
-        font-weight: 500;
+    .modal-content {
+        background: var(--white);
+        border-radius: 12px;
+        max-width: 400px;
+        width: 100%;
+        max-height: 80vh;
+        overflow-y: auto;
     }
 
-    .back-btn {
-        background: rgba(255,255,255,0.2);
-        border: none;
-        color: white;
-        padding: 8px 12px;
-        border-radius: 8px;
-        cursor: pointer;
+    .modal-header {
         display: flex;
         align-items: center;
-        gap: 5px;
+        justify-content: space-between;
+        padding: 16px;
+        border-bottom: 1px solid var(--gray-200);
     }
 
-    .notification-badge {
-        background: #ff3b30;
-        color: white;
-        border-radius: 10px;
-        padding: 2px 6px;
-        font-size: 10px;
-        font-weight: bold;
-        position: absolute;
-        top: -5px;
-        right: -5px;
+    .modal-body {
+        padding: 16px;
     }
 
-    @media (max-width: 400px) {
-        .phone-container {
-            margin: 10px;
-            border-radius: 0;
-        }
-        
-        .bottom-nav {
-            width: 100%;
-            left: 0;
-            transform: none;
-        }
+    .form-group {
+        margin-bottom: 16px;
+    }
+
+    .label {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 6px;
+    }
+
+    .input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid var(--gray-200);
+        border-radius: 8px;
+        font-size: 14px;
+    }
+
+    .input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .primary-btn {
+        width: 100%;
+        padding: 12px;
+        background: var(--primary);
+        color: var(--white);
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-bottom: 8px;
+    }
+
+    .primary-btn:hover {
+        background: #2563eb;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 32px 16px;
+        color: var(--gray-500);
+    }
+
+    .toast {
+        position: fixed;
+        top: 20px;
+        left: 16px;
+        right: 16px;
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 12px 16px;
+        border-radius: 8px;
+        font-weight: 600;
+        z-index: 2000;
+        transform: translateY(-100px);
+        transition: transform 0.3s;
+    }
+
+    .toast.show {
+        transform: translateY(0);
+    }
+
+    .toast-success { background: var(--success); color: var(--white); }
+    .toast-error { background: var(--error); color: var(--white); }
+    .toast-info { background: var(--primary); color: var(--white); }
+
+    .hidden { display: none !important; }
+
+    .spinner {
+        width: 20px;
+        height: 20px;
+        border: 2px solid transparent;
+        border-top: 2px solid currentColor;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
     }
 </style>
 ```
 
 </head>
 <body>
-    <div class="phone-container">
-        <!-- Status Bar -->
-        <div class="status-bar">
-            <span>9:41</span>
-            <span>KeyTech7</span>
-            <span>🔋 100%</span>
-        </div>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-row">
+                <button class="btn" id="refreshBtn">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 4v6h6M23 20v-6h-6"/>
+                        <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/>
+                    </svg>
+                </button>
 
 ```
-    <!-- Dashboard Screen -->
-    <div class="screen active" id="dashboard">
-        <div class="header">
-            <h1>Dashboard</h1>
-            <div class="profile-icon">JD</div>
-        </div>
-        <div class="dashboard">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-number">12</div>
-                    <div class="stat-label">Assigned Keys</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">3</div>
-                    <div class="stat-label">Overdue</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">8</div>
-                    <div class="stat-label">Active</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">1</div>
-                    <div class="stat-label">Maintenance</div>
-                </div>
+            <div class="month-nav">
+                <button class="btn" id="prevBtn">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 18l-6-6 6-6"/>
+                    </svg>
+                </button>
+                <h1 class="month-title" id="monthTitle">April 2024</h1>
+                <button class="btn" id="nextBtn">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 18l6-6-6-6"/>
+                    </svg>
+                </button>
             </div>
             
-            <div class="quick-actions">
-                <h3 class="section-title">Quick Actions</h3>
-                <button class="action-btn" onclick="showScreen('keys')">
-                    <div class="action-icon">🔑</div>
-                    <div>
-                        <div style="font-weight: 600;">View My Keys</div>
-                        <div style="font-size: 12px; color: #6c757d;">Manage assigned keys</div>
-                    </div>
-                </button>
-                <button class="action-btn" onclick="showScreen('audit')">
-                    <div class="action-icon">📋</div>
-                    <div>
-                        <div style="font-weight: 600;">Audit Log</div>
-                        <div style="font-size: 12px; color: #6c757d;">View key history</div>
-                    </div>
-                </button>
-                <button class="action-btn" onclick="showScreen('transfer')">
-                    <div class="action-icon">↗️</div>
-                    <div>
-                        <div style="font-weight: 600;">Transfer Keys</div>
-                        <div style="font-size: 12px; color: #6c757d;">Move keys to colleague</div>
-                    </div>
-                </button>
-                <button class="action-btn" onclick="showScreen('settings')">
-                    <div class="action-icon">⚙️</div>
-                    <div>
-                        <div style="font-weight: 600;">Settings</div>
-                        <div style="font-size: 12px; color: #6c757d;">Configure app & profile</div>
-                    </div>
-                </button>
-            </div>
+            <button class="btn" id="settingsBtn">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+            </button>
+        </div>
+        
+        <div class="status-bar">
+            <div class="status-dot status-sample" id="statusDot"></div>
+            <span id="statusText">Loading...</span>
         </div>
     </div>
 
-    <!-- Keys Screen -->
-    <div class="screen" id="keys">
-        <div class="header">
-            <button class="back-btn" onclick="showScreen('dashboard')">← Back</button>
-            <h1>My Keys</h1>
-            <div style="width: 40px;"></div>
+    <!-- Content -->
+    <div class="content">
+        <!-- Today's Jobs -->
+        <div class="jobs-card">
+            <div class="card-header">
+                <h2 class="card-title">📅 Today's Scheduled Jobs</h2>
+                <div class="badge" id="todayCount">0</div>
+            </div>
+            <div class="jobs-list" id="todayJobs"></div>
         </div>
-        <div class="key-list">
-            <input type="text" class="search-bar" placeholder="Search keys..." onkeyup="searchKeys(this.value)">
+
+        <!-- On-Call -->
+        <div class="jobs-card">
+            <div class="card-header">
+                <h2 class="card-title">🚨 Today's On-Call</h2>
+            </div>
+            <div class="jobs-list" id="onCallInfo"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal hidden" id="settingsModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Excel Integration Settings</h2>
+            <button class="btn" id="closeSettingsBtn">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="label">OneDrive Share Link</label>
+                <input type="text" class="input" id="shareLinkInput" placeholder="Paste your OneDrive share link">
+            </div>
+
+            <div class="form-group">
+                <label class="label">Excel File Name</label>
+                <input type="text" class="input" id="fileNameInput" value="TeamCalendar_2024-04.xlsx">
+            </div>
+
+            <button class="primary-btn" id="loadRealDataBtn">Load Real Excel Data</button>
+            <button class="primary-btn" id="testConnectionBtn">Test Connection</button>
+            <button class="primary-btn" id="saveSettingsBtn">Save Settings</button>
             
-            <div class="key-item">
-                <div class="key-header">
-                    <span class="key-id">KEY-001</span>
-                    <span class="key-status status-active">Active</span>
-                </div>
-                <div class="key-details">
-                    Building A - Server Room<br>
-                    <strong>Location:</strong> Floor 3, Room 301<br>
-                    <strong>Last Check:</strong> 2 hours ago
-                </div>
-                <div class="key-actions">
-                    <button class="btn-small btn-primary" onclick="showKeyDetail('KEY-001')">Details</button>
-                    <button class="btn-small btn-secondary" onclick="updateKeyStatus('KEY-001')">Update</button>
-                </div>
-            </div>
-
-            <div class="key-item">
-                <div class="key-header">
-                    <span class="key-id">KEY-002</span>
-                    <span class="key-status status-maintenance">Maintenance</span>
-                </div>
-                <div class="key-details">
-                    Building B - Equipment Storage<br>
-                    <strong>Location:</strong> Basement, Room B01<br>
-                    <strong>Last Check:</strong> 1 day ago
-                </div>
-                <div class="key-actions">
-                    <button class="btn-small btn-primary" onclick="showKeyDetail('KEY-002')">Details</button>
-                    <button class="btn-small btn-secondary" onclick="updateKeyStatus('KEY-002')">Update</button>
-                </div>
-            </div>
-
-            <div class="key-item">
-                <div class="key-header">
-                    <span class="key-id">KEY-003</span>
-                    <span class="key-status status-active">Active</span>
-                </div>
-                <div class="key-details">
-                    Building C - Network Closet<br>
-                    <strong>Location:</strong> Floor 2, Room C205<br>
-                    <strong>Last Check:</strong> 6 hours ago
-                </div>
-                <div class="key-actions">
-                    <button class="btn-small btn-primary" onclick="showKeyDetail('KEY-003')">Details</button>
-                    <button class="btn-small btn-secondary" onclick="updateKeyStatus('KEY-003')">Update</button>
-                </div>
+            <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--gray-200);">
+                <p style="font-size: 12px; color: var(--gray-500); margin-bottom: 8px;">
+                    <strong>How to get your share link:</strong><br>
+                    1. Go to OneDrive in browser<br>
+                    2. Right-click your Excel file<br>
+                    3. Share → Copy link<br>
+                    4. Paste the full URL above
+                </p>
             </div>
         </div>
-    </div>
-
-    <!-- Key Detail Screen -->
-    <div class="screen" id="keyDetail">
-        <div class="header">
-            <button class="back-btn" onclick="showScreen('keys')">← Back</button>
-            <h1>KEY-001</h1>
-            <div style="width: 40px;"></div>
-        </div>
-        <div class="key-detail-screen">
-            <div class="detail-card">
-                <h3 class="section-title">Key Information</h3>
-                <div class="detail-row">
-                    <span class="detail-label">Key ID</span>
-                    <span class="detail-value">KEY-001</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Location</span>
-                    <span class="detail-value">Building A, Room 301</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Status</span>
-                    <span class="detail-value">Active</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Assigned To</span>
-                    <span class="detail-value">John Doe</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Assigned Date</span>
-                    <span class="detail-value">Sept 10, 2025</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Last Updated</span>
-                    <span class="detail-value">2 hours ago</span>
-                </div>
-            </div>
-
-            <div class="detail-card">
-                <h3 class="section-title">Actions</h3>
-                <button class="btn-full btn-primary" style="margin-bottom: 12px;" onclick="updateKeyStatus('KEY-001')">Update Status</button>
-                <button class="btn-full btn-transfer" onclick="showTransferScreen('KEY-001')">Transfer Key</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Transfer Screen -->
-    <div class="screen" id="transfer">
-        <div class="header">
-            <button class="back-btn" onclick="showScreen('keys')">← Back</button>
-            <h1>Transfer Key</h1>
-            <div style="width: 40px;"></div>
-        </div>
-        <div class="transfer-screen">
-            <div class="form-group">
-                <label class="form-label">Select Key to Transfer</label>
-                <select class="form-select">
-                    <option>KEY-001 - Building A Server Room</option>
-                    <option>KEY-002 - Building B Equipment Storage</option>
-                    <option>KEY-003 - Building C Network Closet</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Transfer To</label>
-                <select class="form-select">
-                    <option value="">Select Technician</option>
-                    <option>Mike Johnson - Tech ID: T002</option>
-                    <option>Sarah Williams - Tech ID: T003</option>
-                    <option>David Brown - Tech ID: T004</option>
-                    <option>Lisa Chen - Tech ID: T005</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Transfer Reason</label>
-                <select class="form-select">
-                    <option>Reassignment</option>
-                    <option>Vacation Coverage</option>
-                    <option>Project Transfer</option>
-                    <option>Emergency</option>
-                    <option>Other</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Notes (Optional)</label>
-                <textarea class="form-input form-textarea" placeholder="Add any additional notes about this transfer..."></textarea>
-            </div>
-
-            <button class="btn-full btn-transfer" onclick="processTransfer()">Complete Transfer</button>
-        </div>
-    </div>
-
-    <!-- Audit Screen -->
-    <div class="screen" id="audit">
-        <div class="header">
-            <button class="back-btn" onclick="showScreen('dashboard')">← Back</button>
-            <h1>Audit Log</h1>
-            <div style="width: 40px;"></div>
-        </div>
-        <div class="audit-screen">
-            <div class="audit-item">
-                <div class="audit-header">
-                    <span class="audit-action">Status Updated</span>
-                    <span class="audit-date">2 hours ago</span>
-                </div>
-                <div class="audit-details">
-                    <strong>KEY-001</strong> status changed from "Maintenance" to "Active"<br>
-                    Updated by: John Doe (T001)
-                </div>
-            </div>
-
-            <div class="audit-item">
-                <div class="audit-header">
-                    <span class="audit-action">Key Transferred</span>
-                    <span class="audit-date">1 day ago</span>
-                </div>
-                <div class="audit-details">
-                    <strong>KEY-004</strong> transferred from John Doe to Mike Johnson<br>
-                    Reason: Project reassignment
-                </div>
-            </div>
-
-            <div class="audit-item">
-                <div class="audit-header">
-                    <span class="audit-action">Key Assigned</span>
-                    <span class="audit-date">3 days ago</span>
-                </div>
-                <div class="audit-details">
-                    <strong>KEY-002</strong> assigned to John Doe (T001)<br>
-                    Location: Building B Equipment Storage
-                </div>
-            </div>
-
-            <div class="audit-item">
-                <div class="audit-header">
-                    <span class="audit-action">Status Updated</span>
-                    <span class="audit-date">5 days ago</span>
-                </div>
-                <div class="audit-details">
-                    <strong>KEY-003</strong> status changed from "Inactive" to "Active"<br>
-                    Updated by: John Doe (T001)
-                </div>
-            </div>
-
-            <div class="audit-item">
-                <div class="audit-header">
-                    <span class="audit-action">Key Check</span>
-                    <span class="audit-date">1 week ago</span>
-                </div>
-                <div class="audit-details">
-                    <strong>KEY-001</strong> routine check completed<br>
-                    Status: Normal operation
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Settings Screen -->
-    <div class="screen" id="settings">
-        <div class="header">
-            <button class="back-btn" onclick="showScreen('dashboard')">← Back</button>
-            <h1>Settings</h1>
-            <div style="width: 40px;"></div>
-        </div>
-        <div class="key-detail-screen">
-            <!-- Technician Identification -->
-            <div class="detail-card">
-                <h3 class="section-title">Technician Identification</h3>
-                <div class="form-group">
-                    <label class="form-label">Full Name *</label>
-                    <input type="text" class="form-input" id="techName" value="John Doe" placeholder="Enter your full name">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Technician ID *</label>
-                    <input type="text" class="form-input" id="techId" value="T001" placeholder="Enter technician ID">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Department</label>
-                    <select class="form-select" id="department">
-                        <option value="maintenance">Maintenance</option>
-                        <option value="facilities">Facilities</option>
-                        <option value="it">IT Support</option>
-                        <option value="security">Security</option>
-                        <option value="operations">Operations</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Contact Phone</label>
-                    <input type="tel" class="form-input" id="phone" value="(555) 123-4567" placeholder="Phone number">
-                </div>
-            </div>
-
-            <!-- Database Location -->
-            <div class="detail-card">
-                <h3 class="section-title">Database Location</h3>
-                <div class="form-group">
-                    <label class="form-label">Database Type *</label>
-                    <select class="form-select" id="dbLocation" onchange="showDbConfig()">
-                        <option value="">Select Database Location</option>
-                        <option value="mongodb">MongoDB Database</option>
-                        <option value="sharepoint">SharePoint Site</option>
-                        <option value="onedrive">OneDrive Directory</option>
-                        <option value="local">Local Network Server</option>
-                        <option value="cloud">Cloud Database</option>
-                    </select>
-                </div>
-
-                <!-- MongoDB Configuration -->
-                <div id="mongodbConfig" style="display: none;">
-                    <div class="form-group">
-                        <label class="form-label">MongoDB Connection Type</label>
-                        <select class="form-select" id="mongoType" onchange="toggleMongoConfig()">
-                            <option value="atlas">MongoDB Atlas (Cloud)</option>
-                            <option value="local">Local MongoDB Server</option>
-                            <option value="replica">Replica Set</option>
-                            <option value="custom">Custom Connection String</option>
-                        </select>
-                    </div>
-                    
-                    <div id="atlasConfig">
-                        <div class="form-group">
-                            <label class="form-label">Atlas Cluster URL *</label>
-                            <input type="text" class="form-input" id="atlasUrl" placeholder="cluster0.xxxxx.mongodb.net">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Username *</label>
-                            <input type="text" class="form-input" id="mongoUsername" placeholder="Database username">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Password *</label>
-                            <input type="password" class="form-input" id="mongoPassword" placeholder="Database password">
-                        </div>
-                    </div>
-                    
-                    <div id="localMongoConfig" style="display: none;">
-                        <div class="form-group">
-                            <label class="form-label">Server Address *</label>
-                            <input type="text" class="form-input" id="mongoHost" value="localhost" placeholder="localhost or IP address">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Port</label>
-                            <input type="number" class="form-input" id="mongoPort" value="27017" placeholder="27017">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Authentication Required</label>
-                            <select class="form-select" id="mongoAuth" onchange="toggleMongoAuth()">
-                                <option value="no">No Authentication</option>
-                                <option value="yes">Username/Password</option>
-                            </select>
-                        </div>
-                        <div id="mongoAuthFields" style="display: none;">
-                            <div class="form-group">
-                                <label class="form-label">Username</label>
-                                <input type="text" class="form-input" id="localMongoUser" placeholder="Database username">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Password</label>
-                                <input type="password" class="form-input" id="localMongoPass" placeholder="Database password">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div id="customMongoConfig" style="display: none;">
-                        <div class="form-group">
-                            <label class="form-label">MongoDB Connection String *</label>
-                            <textarea class="form-input form-textarea" id="mongoConnectionString" placeholder="mongodb://username:password@host:port/database&#10;or&#10;mongodb+srv://username:password@cluster.mongodb.net/database"></textarea>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Database Name *</label>
-                        <input type="text" class="form-input" id="mongoDbName" value="KeyManagementDB" placeholder="Database name">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Collections Configuration</label>
-                        <div style="margin-top: 8px;">
-                            <div style="margin-bottom: 8px;">
-                                <label class="form-label" style="margin-bottom: 4px; font-size: 14px;">Keys Collection:</label>
-                                <input type="text" class="form-input" id="keysCollection" value="keys" placeholder="keys" style="padding: 8px 12px; font-size: 14px;">
-                            </div>
-                            <div style="margin-bottom: 8px;">
-                                <label class="form-label" style="margin-bottom: 4px; font-size: 14px;">Technicians Collection:</label>
-                                <input type="text" class="form-input" id="techniciansCollection" value="technicians" placeholder="technicians" style="padding: 8px 12px; font-size: 14px;">
-                            </div>
-                            <div style="margin-bottom: 8px;">
-                                <label class="form-label" style="margin-bottom: 4px; font-size: 14px;">Audit Collection:</label>
-                                <input type="text" class="form-input" id="auditCollection" value="audit_log" placeholder="audit_log" style="padding: 8px 12px; font-size: 14px;">
-                            </div>
-                            <div>
-                                <label class="form-label" style="margin-bottom: 4px; font-size: 14px;">Transfers Collection:</label>
-                                <input type="text" class="form-input" id="transfersCollection" value="transfers" placeholder="transfers" style="padding: 8px 12px; font-size: 14px;">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Advanced Options</label>
-                        <div style="margin-top: 8px;">
-                            <label style="display: flex; align-items: center; margin-bottom: 8px;">
-                                <input type="checkbox" id="mongoSSL" style="margin-right: 8px;">
-                                Use SSL/TLS Connection
-                            </label>
-                            <label style="display: flex; align-items: center; margin-bottom: 8px;">
-                                <input type="checkbox" id="mongoRetryWrites" checked style="margin-right: 8px;">
-                                Retry Writes
-                            </label>
-                            <label style="display: flex; align-items: center;">
-                                <input type="checkbox" id="mongoCompression" style="margin-right: 8px;">
-                                Enable Compression
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- SharePoint Configuration -->
-                <div id="sharepointDbConfig" style="display: none;">
-                    <div class="form-group">
-                        <label class="form-label">SharePoint Site URL *</label>
-                        <input type="url" class="form-input" id="sharePointSiteUrl" placeholder="https://company.sharepoint.com/sites/keymanagement">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">List/Library Name *</label>
-                        <input type="text" class="form-input" id="sharePointList" value="KeyManagementDB" placeholder="SharePoint list or library name">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">SharePoint Username</label>
-                        <input type="email" class="form-input" id="sharePointUser" placeholder="user@company.com">
-                    </div>
-                </div>
-
-                <!-- OneDrive Configuration -->
-                <div id="onedriveDbConfig" style="display: none;">
-                    <div class="form-group">
-                        <label class="form-label">OneDrive Account *</label>
-                        <input type="email" class="form-input" id="oneDriveUser" placeholder="user@company.onmicrosoft.com">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Database Folder Path *</label>
-                        <input type="text" class="form-input" id="oneDrivePath" value="/KeyManagementDB" placeholder="/KeyManagementDB">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Database File Name</label>
-                        <input type="text" class="form-input" id="oneDriveDbFile" value="keys.db" placeholder="keys.db">
-                    </div>
-                </div>
-
-                <!-- Local Network Configuration -->
-                <div id="localDbConfig" style="display: none;">
-                    <div class="form-group">
-                        <label class="form-label">Server Address *</label>
-                        <input type="text" class="form-input" id="localServer" placeholder="192.168.1.100 or server.company.com">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Database Name *</label>
-                        <input type="text" class="form-input" id="localDbName" value="KeyManagementDB" placeholder="Database name">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Port</label>
-                        <input type="number" class="form-input" id="localPort" value="1433" placeholder="1433">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Username</label>
-                        <input type="text" class="form-input" id="localUser" placeholder="Database username">
-                    </div>
-                </div>
-
-                <!-- Cloud Database Configuration -->
-                <div id="cloudDbConfig" style="display: none;">
-                    <div class="form-group">
-                        <label class="form-label">Cloud Provider</label>
-                        <select class="form-select" id="cloudProvider">
-                            <option value="azure">Microsoft Azure SQL</option>
-                            <option value="aws">Amazon RDS</option>
-                            <option value="google">Google Cloud SQL</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Connection String *</label>
-                        <textarea class="form-input form-textarea" id="cloudConnectionString" placeholder="Server=tcp:server.database.windows.net,1433;Database=KeyManagementDB;..."></textarea>
-                    </div>
-                </div>
-
-                <button class="btn-full btn-secondary" style="margin-top: 15px;" onclick="testDatabaseConnection()">
-                    <span id="testBtnText">Test Database Connection</span>
-                </button>
-                
-                <div id="connectionStatus" style="margin-top: 10px; padding: 12px; border-radius: 8px; display: none; text-align: center; font-weight: 500;">
-                    <!-- Status will be shown here -->
-                </div>
-            </div>
-
-            <!-- Sync Settings -->
-            <div class="detail-card">
-                <h3 class="section-title">Synchronization Settings</h3>
-                <div class="form-group">
-                    <label class="form-label">Auto-Sync Frequency</label>
-                    <select class="form-select" id="syncFrequency">
-                        <option value="realtime">Real-time</option>
-                        <option value="5min">Every 5 minutes</option>
-                        <option value="15min">Every 15 minutes</option>
-                        <option value="30min">Every 30 minutes</option>
-                        <option value="1hour">Every hour</option>
-                        <option value="manual">Manual only</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Offline Mode</label>
-                    <select class="form-select" id="offlineMode">
-                        <option value="enabled">Enabled (Cache data locally)</option>
-                        <option value="disabled">Disabled (Online only)</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Sync on WiFi Only</label>
-                    <select class="form-select" id="wifiOnly">
-                        <option value="no">No (Use mobile data)</option>
-                        <option value="yes">Yes (WiFi only)</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- App Settings -->
-            <div class="detail-card">
-                <h3 class="section-title">App Preferences</h3>
-                <div class="form-group">
-                    <label class="form-label">Default Screen</label>
-                    <select class="form-select" id="defaultView">
-                        <option value="dashboard">Dashboard</option>
-                        <option value="keys">My Keys</option>
-                        <option value="audit">Audit Log</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Notifications</label>
-                    <select class="form-select" id="notifications">
-                        <option value="all">All notifications</option>
-                        <option value="important">Important only</option>
-                        <option value="none">None</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">App Theme</label>
-                    <select class="form-select" id="appTheme">
-                        <option value="light">Light</option>
-                        <option value="dark">Dark</option>
-                        <option value="auto">Auto (system)</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="detail-card">
-                <button class="btn-full btn-primary" style="margin-bottom: 12px;" onclick="saveAllSettings()">Save Settings</button>
-                <button class="btn-full btn-secondary" style="margin-bottom: 12px;" onclick="exportConfiguration()">Export Configuration</button>
-                <button class="btn-full" style="background: #dc3545; color: white; margin-bottom: 12px;" onclick="resetToDefaults()">Reset to Defaults</button>
-                <button class="btn-full btn-secondary" onclick="syncNow()">Sync Now</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Bottom Navigation -->
-    <div class="bottom-nav">
-        <button class="nav-item active" onclick="showScreen('dashboard')">
-            <div class="nav-icon">🏠</div>
-            <div class="nav-label">Home</div>
-        </button>
-        <button class="nav-item" onclick="showScreen('keys')">
-            <div class="nav-icon" style="position: relative;">
-                🔑
-                <span class="notification-badge">3</span>
-            </div>
-            <div class="nav-label">Keys</div>
-        </button>
-        <button class="nav-item" onclick="showScreen('transfer')">
-            <div class="nav-icon">↗️</div>
-            <div class="nav-label">Transfer</div>
-        </button>
-        <button class="nav-item" onclick="showScreen('audit')">
-            <div class="nav-icon">📋</div>
-            <div class="nav-label">Audit</div>
-        </button>
-        <button class="nav-item" onclick="showScreen('settings')">
-            <div class="nav-icon">⚙️</div>
-            <div class="nav-label">Settings</div>
-        </button>
     </div>
 </div>
 
 <script>
-    function showScreen(screenId) {
-        // Hide all screens
-        document.querySelectorAll('.screen').forEach(screen => {
-            screen.classList.remove('active');
-        });
-        
-        // Show selected screen
-        document.getElementById(screenId).classList.add('active');
-        
-        // Update navigation
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.classList.remove('active');
-        });
-        
-        // Find and activate corresponding nav item
-        const navItems = document.querySelectorAll('.nav-item');
-        const screenOrder = ['dashboard', 'keys', 'transfer', 'audit', 'settings'];
-        const index = screenOrder.indexOf(screenId);
-        if (index !== -1) {
-            navItems[index].classList.add('active');
+    // App State
+    const state = {
+        currentMonth: new Date(2024, 3, 1), // April 2024
+        currentDate: new Date(2024, 3, 12), // April 12
+        teamMembers: [],
+        jobAssignments: {},
+        settings: {
+            shareLink: '',
+            fileName: 'TeamCalendar_2024-04.xlsx'
         }
-    }
+    };
 
-    function showKeyDetail(keyId) {
-        document.querySelector('#keyDetail h1').textContent = keyId;
-        showScreen('keyDetail');
-    }
+    // Excel Data Loading
+    async function loadRealExcelData() {
+        try {
+            showToast('Loading real Excel data from OneDrive...', 'info');
+            updateStatus('sample', 'Connecting to OneDrive...');
 
-    function showTransferScreen(keyId) {
-        showScreen('transfer');
-        if (keyId) {
-            const select = document.querySelector('.transfer-screen select');
-            Array.from(select.options).forEach(option => {
-                if (option.textContent.includes(keyId)) {
-                    option.selected = true;
+            if (!state.settings.shareLink) {
+                throw new Error('No OneDrive share link provided');
+            }
+
+            // Convert OneDrive share link to direct download URL
+            const downloadUrl = convertShareLinkToDownloadUrl(state.settings.shareLink);
+            console.log('Download URL:', downloadUrl);
+
+            // Fetch Excel file as binary data
+            const response = await fetch(downloadUrl, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
                 }
             });
-        }
-    }
 
-    function updateKeyStatus(keyId) {
-        const newStatus = prompt(`Update status for ${keyId}:\n1. Active\n2. Maintenance\n3. Inactive\n\nEnter number (1-3):`);
-        
-        const statusMap = {
-            '1': 'Active',
-            '2': 'Maintenance', 
-            '3': 'Inactive'
-        };
-        
-        if (statusMap[newStatus]) {
-            alert(`${keyId} status updated to: ${statusMap[newStatus]}`);
-        }
-    }
-
-    function processTransfer() {
-        const key = document.querySelector('.transfer-screen select').value;
-        const technician = document.querySelectorAll('.transfer-screen select')[1].value;
-        const reason = document.querySelectorAll('.transfer-screen select')[2].value;
-        
-        if (key && technician) {
-            alert(`Transfer initiated!\n\nKey: ${key}\nTo: ${technician}\nReason: ${reason}`);
-            showScreen('keys');
-        } else {
-            alert('Please fill in all required fields');
-        }
-    }
-
-    function searchKeys(query) {
-        const keyItems = document.querySelectorAll('.key-item');
-        
-        keyItems.forEach(item => {
-            const keyId = item.querySelector('.key-id').textContent;
-            const keyDetails = item.querySelector('.key-details').textContent;
-            
-            if (keyId.toLowerCase().includes(query.toLowerCase()) || 
-                keyDetails.toLowerCase().includes(query.toLowerCase())) {
-                item.style.display = 'block';
-            } else {
-                item.style.display = 'none';
+            if (!response.ok) {
+                throw new Error(`Failed to fetch Excel file: ${response.status} ${response.statusText}`);
             }
+
+            const arrayBuffer = await response.arrayBuffer();
+            console.log('Excel file downloaded, size:', arrayBuffer.byteLength);
+
+            // Parse Excel file using SheetJS
+            const workbook = XLSX.read(arrayBuffer, {
+                type: 'array',
+                cellDates: true,
+                cellFormulas: false
+            });
+
+            console.log('Workbook sheets:', workbook.SheetNames);
+
+            // Parse each required worksheet
+            const teamMembers = parseTeamMembersSheet(workbook);
+            const jobAssignments = parseJobAssignmentsSheet(workbook);
+
+            console.log('Parsed team members:', teamMembers);
+            console.log('Parsed job assignments:', Object.keys(jobAssignments).length, 'members with jobs');
+
+            // Update app state with real data
+            state.teamMembers = teamMembers;
+            state.jobAssignments = jobAssignments;
+
+            updateStatus('excel', 'Real Excel data loaded');
+            showToast('Excel data loaded successfully!', 'success');
+            
+            renderApp();
+            
+        } catch (error) {
+            console.error('Excel loading error:', error);
+            showToast(`Excel loading failed: ${error.message}`, 'error');
+            updateStatus('error', 'Excel loading failed');
+            
+            // Fall back to sample data
+            loadSampleData();
+        }
+    }
+
+    function convertShareLinkToDownloadUrl(shareLink) {
+        try {
+            // Convert OneDrive share link to direct download URL
+            if (shareLink.includes('sharepoint.com')) {
+                // For SharePoint/OneDrive for Business links
+                const base64Encoded = shareLink.split('/').pop().split('?')[0];
+                return shareLink.replace(':x:', ':x:').replace(/\?.*$/, '') + '&download=1';
+            } else {
+                // For personal OneDrive links
+                return shareLink + '&download=1';
+            }
+        } catch (error) {
+            console.error('Error converting share link:', error);
+            return shareLink;
+        }
+    }
+
+    function parseTeamMembersSheet(workbook) {
+        try {
+            const sheetName = 'Team Members';
+            if (!workbook.Sheets[sheetName]) {
+                throw new Error(`Worksheet "${sheetName}" not found`);
+            }
+
+            const worksheet = workbook.Sheets[sheetName];
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+            
+            // Skip header row and parse data
+            const dataRows = jsonData.slice(1);
+            const teamMembers = [];
+
+            dataRows.forEach((row, index) => {
+                if (row[0] && row[1]) { // ID and Name required
+                    teamMembers.push({
+                        id: parseInt(row[0]),
+                        name: row[1],
+                        role: row[2] || 'Team Member',
+                        color: row[3] || 'member-blue',
+                        avatar: row[4] || row[1].substring(0, 2).toUpperCase()
+                    });
+                }
+            });
+
+            console.log('Parsed team members:', teamMembers);
+            return teamMembers;
+        } catch (error) {
+            console.error('Error parsing Team Members sheet:', error);
+            throw error;
+        }
+    }
+
+    function parseJobAssignmentsSheet(workbook) {
+        try {
+            const sheetName = 'Job Assignments';
+            if (!workbook.Sheets[sheetName]) {
+                throw new Error(`Worksheet "${sheetName}" not found`);
+            }
+
+            const worksheet = workbook.Sheets[sheetName];
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+            
+            // Skip header row and parse data
+            const dataRows = jsonData.slice(1);
+            const jobAssignments = {};
+
+            dataRows.forEach((row, index) => {
+                try {
+                    if (row[0] && row[1] && row[2]) { // Member_ID, Date, Job_Title required
+                        const memberId = parseInt(row[0]);
+                        const date = new Date(row[1]);
+                        const day = date.getDate();
+
+                        const job = {
+                            title: row[2],
+                            type: row[3] || 'development',
+                            duration: row[4] || 'full',
+                            description: row[5] || '',
+                            client: row[6] || 'Unknown',
+                            priority: row[7] || 'Medium',
+                            estimatedHours: parseFloat(row[8]) || 8,
+                            status: row[9] || 'Not Started',
+                            notes: row[10] || ''
+                        };
+
+                        if (!jobAssignments[memberId]) {
+                            jobAssignments[memberId] = {};
+                        }
+                        if (!jobAssignments[memberId][day]) {
+                            jobAssignments[memberId][day] = [];
+                        }
+
+                        jobAssignments[memberId][day].push(job);
+                    }
+                } catch (rowError) {
+                    console.warn(`Error parsing job assignment row ${index + 2}:`, rowError);
+                }
+            });
+
+            console.log('Parsed job assignments:', jobAssignments);
+            return jobAssignments;
+        } catch (error) {
+            console.error('Error parsing Job Assignments sheet:', error);
+            throw error;
+        }
+    }
+
+    // Sample Data Fallback
+    function loadSampleData() {
+        console.log('Loading sample data...');
+        
+        state.teamMembers = [
+            { id: 1, name: 'Sarah Martinez', role: 'UI/UX Designer', color: 'member-blue', avatar: 'SM' },
+            { id: 2, name: 'Alex Chen', role: 'Frontend Dev', color: 'member-green', avatar: 'AC' },
+            { id: 3, name: 'Maya Patel', role: 'Backend Dev', color: 'member-purple', avatar: 'MP' },
+            { id: 5, name: 'Lisa Wong', role: 'Project Manager', color: 'member-pink', avatar: 'LW' }
+        ];
+
+        state.jobAssignments = {
+            1: {
+                12: [{
+                    title: 'Design Review',
+                    type: 'meeting',
+                    duration: 'half',
+                    description: 'Review design deliverables',
+                    client: 'TechCorp Inc.',
+                    priority: 'High',
+                    estimatedHours: 4,
+                    status: 'Scheduled',
+                    notes: 'Prepare presentation'
+                }]
+            },
+            5: {
+                12: [{
+                    title: 'On-Call Support',
+                    type: 'on-call',
+                    duration: 'full',
+                    description: 'Emergency support',
+                    client: 'Operations',
+                    priority: 'High',
+                    estimatedHours: 8,
+                    status: 'Active',
+                    notes: 'Monitor alerts'
+                }]
+            }
+        };
+
+        updateStatus('sample', 'Using sample data');
+        renderApp();
+    }
+
+    // Render Functions
+    function renderApp() {
+        renderTodaysJobs();
+        renderOnCall();
+    }
+
+    function renderTodaysJobs() {
+        const today = state.currentDate.getDate();
+        const allJobs = [];
+
+        // Collect all jobs for today
+        for (const memberId in state.jobAssignments) {
+            const memberJobs = state.jobAssignments[memberId]?.[today] || [];
+            const member = state.teamMembers.find(m => m.id === parseInt(memberId));
+            
+            if (member) {
+                memberJobs.forEach(job => {
+                    allJobs.push({
+                        ...job,
+                        memberName: member.name,
+                        memberAvatar: member.avatar,
+                        memberColor: member.color
+                    });
+                });
+            }
+        }
+
+        // Sort by priority
+        allJobs.sort((a, b) => {
+            const priority = { 'High': 3, 'Medium': 2, 'Low': 1 };
+            return (priority[b.priority] || 0) - (priority[a.priority] || 0);
+        });
+
+        // Update count
+        document.getElementById('todayCount').textContent = allJobs.length;
+
+        // Render jobs
+        const container = document.getElementById('todayJobs');
+        if (allJobs.length === 0) {
+            container.innerHTML = '<div class="empty-state">No jobs scheduled for today</div>';
+            return;
+        }
+
+        container.innerHTML = '';
+        allJobs.forEach(job => {
+            const jobEl = document.createElement('div');
+            jobEl.className = `job ${job.type === 'on-call' ? 'on-call' : ''}`;
+            
+            jobEl.innerHTML = `
+                <div class="avatar ${job.memberColor}">${job.memberAvatar}</div>
+                <div class="job-info">
+                    <div class="job-badges">
+                        <div class="type-badge job-${job.type}">
+                            ${job.type.charAt(0).toUpperCase() + job.type.slice(1)}
+                        </div>
+                        <div class="priority-badge priority-${job.priority.toLowerCase()}">
+                            ${job.priority}
+                        </div>
+                    </div>
+                    <div class="job-title">${job.title}</div>
+                    <div class="job-meta">${job.memberName} • ${job.client}</div>
+                    <div class="job-meta">
+                        ${job.duration === 'full' ? 'Full Day' : 'Half Day'} (${job.estimatedHours}h)
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(jobEl);
         });
     }
 
-    // Settings Functions
-    function showDbConfig() {
-        const dbLocation = document.getElementById('dbLocation').value;
-        
-        // Hide all config sections
-        document.getElementById('mongodbConfig').style.display = 'none';
-        document.getElementById('sharepointDbConfig').style.display = 'none';
-        document.getElementById('onedriveDbConfig').style.display = 'none';
-        document.getElementById('localDbConfig').style.display = 'none';
-        document.getElementById('cloudDbConfig').style.display = 'none';
-        
-        // Show relevant config section
-        switch(dbLocation) {
-            case 'mongodb':
-                document.getElementById('mongodbConfig').style.display = 'block';
-                toggleMongoConfig();
-                break;
-            case 'sharepoint':
-                document.getElementById('sharepointDbConfig').style.display = 'block';
-                break;
-            case 'onedrive':
-                document.getElementById('onedriveDbConfig').style.display = 'block';
-                break;
-            case 'local':
-                document.getElementById('localDbConfig').style.display = 'block';
-                break;
-            case 'cloud':
-                document.getElementById('cloudDbConfig').style.display = 'block';
-                break;
-        }
-    }
+    function renderOnCall() {
+        const today = state.currentDate.getDate();
+        let onCallPerson = null;
 
-    function toggleMongoConfig() {
-        const mongoType = document.getElementById('mongoType').value;
-        
-        // Hide all MongoDB config sections
-        document.getElementById('atlasConfig').style.display = 'none';
-        document.getElementById('localMongoConfig').style.display = 'none';
-        document.getElementById('customMongoConfig').style.display = 'none';
-        
-        // Show relevant MongoDB config
-        switch(mongoType) {
-            case 'atlas':
-                document.getElementById('atlasConfig').style.display = 'block';
+        // Find on-call person
+        for (const memberId in state.jobAssignments) {
+            const memberJobs = state.jobAssignments[memberId]?.[today] || [];
+            if (memberJobs.some(job => job.type === 'on-call')) {
+                onCallPerson = state.teamMembers.find(m => m.id === parseInt(memberId));
                 break;
-            case 'local':
-            case 'replica':
-                document.getElementById('localMongoConfig').style.display = 'block';
-                break;
-            case 'custom':
-                document.getElementById('customMongoConfig').style.display = 'block';
-                break;
-        }
-    }
-
-    function toggleMongoAuth() {
-        const authRequired = document.getElementById('mongoAuth').value === 'yes';
-        document.getElementById('mongoAuthFields').style.display = authRequired ? 'block' : 'none';
-    }
-
-    function testDatabaseConnection() {
-        const dbLocation = document.getElementById('dbLocation').value;
-        const statusDiv = document.getElementById('connectionStatus');
-        const testBtn = document.getElementById('testBtnText');
-        
-        if (!dbLocation) {
-            alert('Please select a database location first');
-            return;
-        }
-        
-        // Show testing status
-        testBtn.textContent = 'Testing Connection...';
-        statusDiv.style.display = 'block';
-        statusDiv.style.background = '#fff3cd';
-        statusDiv.style.color = '#856404';
-        statusDiv.textContent = '🔄 Testing database connection...';
-        
-        // Simulate connection test
-        setTimeout(() => {
-            testBtn.textContent = 'Test Database Connection';
-            
-            const success = Math.random() > 0.2; // 80% success rate for demo
-            
-            if (success) {
-                statusDiv.style.background = '#d4edda';
-                statusDiv.style.color = '#155724';
-                statusDiv.innerHTML = '✅ Database connection successful!<br><small>All systems ready</small>';
-            } else {
-                statusDiv.style.background = '#f8d7da';
-                statusDiv.style.color = '#721c24';
-                statusDiv.innerHTML = '❌ Connection failed<br><small>Please check your settings</small>';
             }
+        }
+
+        const container = document.getElementById('onCallInfo');
+        if (onCallPerson) {
+            container.innerHTML = `
+                <div class="job on-call">
+                    <div class="avatar ${onCallPerson.color}">${onCallPerson.avatar}</div>
+                    <div class="job-info">
+                        <div class="job-title">${onCallPerson.name}</div>
+                        <div class="job-meta">${onCallPerson.role}</div>
+                        <div class="job-meta" style="color: #dc2626; font-weight: 600;">
+                            🚨 Available for emergency support
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            container.innerHTML = '<div class="empty-state">No one assigned</div>';
+        }
+    }
+
+    function updateStatus(type, message) {
+        document.getElementById('statusDot').className = `status-dot status-${type}`;
+        document.getElementById('statusText').textContent = message;
+    }
+
+    function showToast(message, type = 'info') {
+        const existingToasts = document.querySelectorAll('.toast');
+        existingToasts.forEach(toast => toast.remove());
+
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => toast.classList.add('show'), 100);
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
         }, 3000);
     }
 
-    function saveAllSettings() {
-        const techName = document.getElementById('techName').value;
-        const techId = document.getElementById('techId').value;
-        const dbLocation = document.getElementById('dbLocation').value;
-        
-        if (!techName || !techId) {
-            alert('Please fill in your name and technician ID');
-            return;
+    // Settings Functions
+    function loadSettings() {
+        const saved = localStorage.getItem('teamCalendarSettings');
+        if (saved) {
+            try {
+                state.settings = { ...state.settings, ...JSON.parse(saved) };
+            } catch (e) {
+                console.error('Failed to load settings:', e);
+            }
         }
-        
-        if (!dbLocation) {
-            alert('Please select a database location');
-            return;
-        }
-        
-        // Update profile icon in header
-        const profileIcon = document.querySelector('.profile-icon');
-        const initials = techName.split(' ').map(n => n[0]).join('').toUpperCase();
-        profileIcon.textContent = initials;
-        
-        alert('✅ Settings saved successfully!\n\nAll configuration changes have been applied.');
+
+        document.getElementById('shareLinkInput').value = state.settings.shareLink;
+        document.getElementById('fileNameInput').value = state.settings.fileName;
     }
 
-    function exportConfiguration() {
-        const config = {
-            technician: {
-                name: document.getElementById('techName').value,
-                id: document.getElementById('techId').value,
-                department: document.getElementById('department').value,
-                phone: document.getElementById('phone').value
-            },
-            database: {
-                type: document.getElementById('dbLocation').value
-            },
-            exportDate: new Date().toISOString()
-        };
-        
-        const configString = JSON.stringify(config, null, 2);
-        const blob = new Blob([configString], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `keytech_config_${config.technician.id}_${new Date().toISOString().split('T')[0]}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        
-        alert('✅ Configuration exported successfully!');
+    function saveSettings() {
+        state.settings.shareLink = document.getElementById('shareLinkInput').value.trim();
+        state.settings.fileName = document.getElementById('fileNameInput').value.trim();
+
+        localStorage.setItem('teamCalendarSettings', JSON.stringify(state.settings));
+        showToast('Settings saved!', 'success');
+        closeModal();
     }
 
-    function resetToDefaults() {
-        if (confirm('⚠️ Reset all settings to defaults?\n\nThis cannot be undone.')) {
-            // Reset all form values
-            document.getElementById('techName').value = 'John Doe';
-            document.getElementById('techId').value = 'T001';
-            document.getElementById('department').value = 'maintenance';
-            document.getElementById('phone').value = '(555) 123-4567';
-            document.getElementById('dbLocation').value = '';
-            
-            // Hide all config sections
-            showDbConfig();
-            document.getElementById('connectionStatus').style.display = 'none';
-            
-            alert('✅ Settings reset to defaults successfully!');
+    async function testConnection() {
+        const button = document.getElementById('testConnectionBtn');
+        button.disabled = true;
+        button.innerHTML = 'Testing... <span class="spinner"></span>';
+
+        try {
+            if (!state.settings.shareLink) {
+                throw new Error('Please enter OneDrive share link first');
+            }
+
+            // Test the connection
+            const downloadUrl = convertShareLinkToDownloadUrl(state.settings.shareLink);
+            const response = await fetch(downloadUrl, { method: 'HEAD' });
+
+            if (response.ok) {
+                showToast('OneDrive connection successful!', 'success');
+            } else {
+                throw new Error(`Connection failed: ${response.status}`);
+            }
+        } catch (error) {
+            showToast(`Connection test failed: ${error.message}`, 'error');
+        } finally {
+            button.disabled = false;
+            button.textContent = 'Test Connection';
         }
     }
 
-    function syncNow() {
-        const dbLocation = document.getElementById('dbLocation').value;
-        
-        if (!dbLocation) {
-            alert('Please configure your database location first');
-            return;
-        }
-        
-        alert('✅ Sync completed successfully!\n\n• Keys updated: 12\n• New transfers: 2\n• Audit entries: 5\n\nLast sync: ' + new Date().toLocaleTimeString());
+    function openSettings() {
+        document.getElementById('settingsModal').classList.remove('hidden');
     }
 
-    // Initialize app
-    document.addEventListener('DOMContentLoaded', function() {
-        showScreen('dashboard');
-    });
+    function closeModal() {
+        document.getElementById('settingsModal').classList.add('hidden');
+    }
+
+    // Event Listeners
+    document.getElementById('settingsBtn').onclick = openSettings;
+    document.getElementById('closeSettingsBtn').onclick = closeModal;
+    document.getElementById('saveSettingsBtn').onclick = saveSettings;
+    document.getElementById('testConnectionBtn').onclick = testConnection;
+    document.getElementById('loadRealDataBtn').onclick = loadRealExcelData;
+    document.getElementById('refreshBtn').onclick = () => {
+        if (state.settings.shareLink) {
+            loadRealExcelData();
+        } else {
+            openSettings();
+        }
+    };
+
+    document.getElementById('settingsModal').onclick = (e) => {
+        if (e.target.id === 'settingsModal') closeModal();
+    };
+
+    // Initialize
+    function init() {
+        loadSettings();
+        
+        // Try to load real Excel data if configured
+        if (state.settings.shareLink) {
+            loadRealExcelData();
+        } else {
+            loadSampleData();
+            setTimeout(() => {
+                showToast('Add OneDrive link in Settings for real data', 'info');
+            }, 2000);
+        }
+    }
+
+    init();
 </script>
 ```
 
